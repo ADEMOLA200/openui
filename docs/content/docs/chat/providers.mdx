@@ -89,29 +89,28 @@ Use the same decision rules:
 - start with `apiUrl` when the endpoint already matches the request and stream shape your frontend expects
 - switch to `processMessage` when you need auth headers, a custom body, dynamic routing, or provider-specific metadata
 
-```mermaid
-flowchart TD
+<Mermaid initialZoom={2.8} chart={`flowchart TD
     START(["What does your backend emit?"])
 
-    START -->|"OpenUI Protocol\n(default)"| OUI["No adapter needed\nNo messageFormat needed"]
+    START -->|"OpenUI Protocol\\n(default)"| OUI["No adapter needed\\nNo messageFormat needed"]
 
-    START -->|"Raw OpenAI SSE\ndata: chunks"| RSSE["openAIAdapter()"]
-    RSSE --> Q1{"Messages differ\nfrom AG-UI default?"}
+    START -->|"Raw OpenAI SSE\\ndata: chunks"| RSSE["openAIAdapter()"]
+    RSSE --> Q1{"Messages differ\\nfrom AG-UI default?"}
     Q1 -->|"Yes"| MF1["+ openAIMessageFormat"]
     Q1 -->|"No"| DONE1["Done"]
 
-    START -->|"OpenAI SDK\ntoReadableStream / NDJSON"| NDJSON["openAIReadableStreamAdapter()"]
-    NDJSON --> Q2{"Messages differ\nfrom AG-UI default?"}
+    START -->|"OpenAI SDK\\ntoReadableStream / NDJSON"| NDJSON["openAIReadableStreamAdapter()"]
+    NDJSON --> Q2{"Messages differ\\nfrom AG-UI default?"}
     Q2 -->|"Yes"| MF2["+ openAIMessageFormat"]
     Q2 -->|"No"| DONE2["Done"]
 
-    START -->|"OpenAI Responses API\nopenai.responses.create()"| RESP["openAIResponsesAdapter()"]
-    RESP --> Q3{"Storing Responses\nconversation items?"}
+    START -->|"OpenAI Responses API\\nopenai.responses.create()"| RESP["openAIResponsesAdapter()"]
+    RESP --> Q3{"Storing Responses\\nconversation items?"}
     Q3 -->|"Yes"| MF3["+ openAIConversationMessageFormat"]
     Q3 -->|"No"| DONE3["Done"]
 
-    START -->|"Vercel AI SDK / LangGraph"| VAI["Inspect actual route output\nthen apply matching rule above"]
-```
+    START -->|"Vercel AI SDK / LangGraph"| VAI["Inspect actual route output\\nthen apply matching rule above"]
+`} />
 
 ## Related guides
 

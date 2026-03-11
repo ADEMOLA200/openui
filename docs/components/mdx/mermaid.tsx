@@ -198,7 +198,7 @@ function MermaidContent({ chart, initialZoom = 1 }: { chart: string; initialZoom
           bottom: 8,
           left: 8,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           gap: 4,
           zIndex: 10,
           pointerEvents: "none",
