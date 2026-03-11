@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@openuidev/cli": "workspace:*",
+    "@openuidev/react-lang": "workspace:^",
     "@openuidev/react-headless": "workspace:^",
     "@openuidev/react-lang": "workspace:^",
     "@openuidev/react-ui": "workspace:^",
