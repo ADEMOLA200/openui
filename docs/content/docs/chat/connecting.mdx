@@ -113,28 +113,28 @@ Once you know what each prop does, the decision becomes:
 3. Add `streamProtocol` only if your backend does not stream the default OpenUI Protocol.
 4. Add `messageFormat` only if your backend expects or returns a non-default message shape.
 
-```mermaid
-flowchart TD
+<Mermaid initialZoom={1.24} chart={`flowchart TD
     START(["Start"])
 
-    START --> Q1{"Need auth, extra fields,\nor custom request body?"}
+    START --> Q1{"Need auth, extra fields,\\nor custom request body?"}
 
-    Q1 -->|"No"| AU["apiUrl\nsimplest path"]
-    Q1 -->|"Yes"| PM["processMessage\nfull request control"]
+    Q1 -->|"No"| AU["apiUrl\\nsimplest path"]
+    Q1 -->|"Yes"| PM["processMessage\\nfull request control"]
 
-    AU & PM --> Q2{"What does your\nbackend stream?"}
+    AU & PM --> Q2{"What does your\\nbackend stream?"}
 
-    Q2 -->|"OpenUI Protocol\n(default)"| SP0["No streamProtocol needed"]
-    Q2 -->|"OpenAI SDK\ntoReadableStream / NDJSON"| SP1["openAIReadableStreamAdapter()"]
+    Q2 -->|"OpenUI Protocol\\n(default)"| SP0["No streamProtocol needed"]
+    Q2 -->|"OpenAI SDK\\ntoReadableStream / NDJSON"| SP1["openAIReadableStreamAdapter()"]
     Q2 -->|"Raw OpenAI SSE"| SP2["openAIAdapter()"]
     Q2 -->|"OpenAI Responses API"| SP3["openAIResponsesAdapter()"]
 
-    SP0 & SP1 & SP2 & SP3 --> Q3{"What message shape\ndoes your backend expect?"}
+    SP0 & SP1 & SP2 & SP3 --> Q3{"What message shape\\ndoes your backend expect?"}
 
-    Q3 -->|"AG-UI shape\n(default)"| MF0["No messageFormat needed"]
+    Q3 -->|"AG-UI shape\\n(default)"| MF0["No messageFormat needed"]
     Q3 -->|"OpenAI chat messages"| MF1["openAIMessageFormat"]
     Q3 -->|"OpenAI Responses items"| MF2["openAIConversationMessageFormat"]
-```
+
+`} />
 
 ## Rules summary
 
