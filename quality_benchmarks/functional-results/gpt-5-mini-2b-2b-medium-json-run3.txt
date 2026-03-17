@@ -1,0 +1,75 @@
+{
+  "steps": [
+    {
+      "id": "fetch_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "extract": "$.users"
+    },
+    {
+      "id": "filter_active_users",
+      "method": "GET",
+      "endpoint": "/api/users", 
+      "dependsOn": [
+        "fetch_users"
+      ],
+      "condition": "$length(fetch_users.extract) > 0",
+      "extract": "$[?(@.active == true)]",
+      "body": {}
+    },
+    {
+      "id": "for_each_active_user_fetch_purchases",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}/purchases",
+      "forEach": "filter_active_users.extract",
+      "dependsOn": [
+        "filter_active_users"
+      ],
+      "queryParams": {
+        "since": "2025-01-01",
+        "min_amount": "500"
+      },
+      "extract": "$.purchases"
+    },
+    {
+      "id": "identify_qualifying_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "for_each_active_user_fetch_purchases",
+        "filter_active_users"
+      ],
+      "condition": "true",
+      "extract": "$filter(${filter_active_users.extract}, function(u, idx){ var purchases = ${for_each_active_user_fetch_purchases.extract}[idx] || []; return purchases.length >= 3 ? { user: u, purchases: purchases } : null })"
+    },
+    {
+      "id": "fetch_department_for_each_qualifying_user",
+      "method": "GET",
+      "endpoint": "/api/departments/{department_id}",
+      "forEach": "identify_qualifying_users.extract",
+      "dependsOn": [
+        "identify_qualifying_users"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "send_email_to_qualifying_user",
+      "method": "POST",
+      "endpoint": "/api/notifications/email",
+      "forEach": "identify_qualifying_users.extract",
+      "dependsOn": [
+        "fetch_department_for_each_qualifying_user",
+        "identify_qualifying_users"
+      ],
+      "body": {
+        "to": "{item.user.email}",
+        "subject": "Loyalty Reward — {item_department.name}",
+        "body": "Hi {item.user.name}, you have made {item.purchases.length} qualifying purchases. You are eligible for our loyalty program."
+      },
+      "extract": "$.notification_id"
+    }
+  ],
+  "output": {
+    "format": "$map(identify_qualifying_users.extract, function(item, idx){ return { user_name: item.user.name, email: item.user.email, department_name: fetch_department_for_each_qualifying_user.extract[idx].name, purchase_count: item.purchases.length, notification_id: send_email_to_qualifying_user.extract[idx] } })"
+  }
+}

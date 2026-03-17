@@ -1,0 +1,70 @@
+{
+  "steps": [
+    {
+      "id": "fetch_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "extract": "$.users"
+    },
+    {
+      "id": "filter_active_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "fetch_users"
+      ],
+      "extract": "$.users[?(@.active == true)]"
+    },
+    {
+      "id": "fetch_user_purchases",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}/purchases",
+      "queryParams": {
+        "since": "2025-01-01",
+        "min_amount": "500"
+      },
+      "dependsOn": [
+        "filter_active_users"
+      ],
+      "forEach": "$.filter_active_users",
+      "extract": "$.purchases"
+    },
+    {
+      "id": "identify_qualifying_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "fetch_user_purchases"
+      ],
+      "extract": "$.filter_active_users[?(@.purchases.length >= 3)]"
+    },
+    {
+      "id": "fetch_department_info",
+      "method": "GET",
+      "endpoint": "/api/departments/{department_id}",
+      "dependsOn": [
+        "identify_qualifying_users"
+      ],
+      "forEach": "$.identify_qualifying_users",
+      "extract": "$.name"
+    },
+    {
+      "id": "send_email_notifications",
+      "method": "POST",
+      "endpoint": "/api/notifications/email",
+      "body": {
+        "to": "{user_email}",
+        "subject": "Loyalty Reward — {department_name}",
+        "body": "Hi {user_name}, you have made {purchase_count} qualifying purchases. You are eligible for our loyalty program."
+      },
+      "dependsOn": [
+        "fetch_department_info"
+      ],
+      "forEach": "$.identify_qualifying_users",
+      "extract": "$.notification_id"
+    }
+  ],
+  "output": {
+    "format": "$.identify_qualifying_users.map(user => ({ user_name: user.name, email: user.email, department_name: $.fetch_department_info[user.department_id].name, purchase_count: user.purchases.length, notification_id: $.send_email_notifications[user.id].notification_id }))"
+  }
+}

@@ -53,6 +53,23 @@ export function getSchemaId(schema: unknown): string | undefined {
   }
 }
 
+export function getFieldDescription(schema: unknown): string | undefined {
+  // Check the schema itself first
+  try {
+    const meta = z.globalRegistry.get(schema as z.ZodType);
+    if (meta?.description) return meta.description;
+  } catch {}
+  // Check unwrapped inner type (handles z.string().describe().optional())
+  const inner = unwrap(schema);
+  if (inner !== schema) {
+    try {
+      const meta = z.globalRegistry.get(inner as z.ZodType);
+      if (meta?.description) return meta.description;
+    } catch {}
+  }
+  return undefined;
+}
+
 export function getUnionOptions(schema: unknown): unknown[] | undefined {
   const def = getZodDef(schema);
   if (def?.type === "union" && Array.isArray(def.options)) return def.options;
@@ -141,6 +158,12 @@ export function resolveTypeAnnotation(schema: unknown): string | undefined {
       return fieldType ? `${name}${opt}: ${fieldType}` : `${name}${opt}`;
     });
     return `{${fields.join(", ")}}`;
+  }
+
+  if (zodType === "record") {
+    const def = getZodDef(inner);
+    const valueType = resolveTypeAnnotation(def?.valueType) ?? "unknown";
+    return `{[key: string]: ${valueType}}`;
   }
 
   if (zodType === "lazy") {

@@ -1,0 +1,225 @@
+root = Doc5SystemArchitecture(
+    document=Doc5DocumentInfo(
+        id="ARCH-2026-HELIOS-003",
+        version="2.1",
+        author=Doc5Author(
+            name="Marcus Tan",
+            role="Principal Architect"
+        ),
+        reviewer=Doc5Reviewer(
+            name="Elena Voss",
+            role="VP of Engineering"
+        ),
+        lastUpdated="2026-01-22"
+    ),
+    project=Doc5Project(
+        name="Project Helios",
+        architecture="event-driven",
+        peakThroughput=12000,
+        uptimeSla=99.95,
+        slaWindowDays=30,
+        maxLatencyMs=800,
+        monthlyInfrastructureCost=47500
+    ),
+    deployment=Doc5Deployment(
+        provider="aws",
+        primaryRegion="us-east-1",
+        drRegion="eu-west-1"
+    ),
+    services=[
+        Doc5Service(
+            name="Order Gateway",
+            language="Go",
+            languageVersion="1.22",
+            compute=Doc5Compute(
+                minReplicas=4,
+                maxReplicas=20,
+                scalingMetric="cpu",
+                scalingThreshold=70,
+                cpuPerReplica=2,
+                memoryPerReplicaGb=4
+            ),
+            apis=[
+                Doc5ApiEndpoint(protocol="rest", port=8080),
+                Doc5ApiEndpoint(protocol="grpc", port=9090)
+            ],
+            healthCheck=Doc5HealthCheck(
+                intervalSeconds=15,
+                endpoint="/healthz"
+            ),
+            consumesTopics=[],
+            producesTopics=["orders.submitted"],
+            dependencies=[
+                Doc5Dependency(
+                    name="Validation Service",
+                    type="external-api"
+                )
+            ]
+        ),
+        Doc5Service(
+            name="Validation Service",
+            language="Java",
+            languageVersion="21",
+            compute=Doc5Compute(
+                minReplicas=3,
+                maxReplicas=15,
+                scalingMetric="cpu",
+                scalingThreshold=65,
+                cpuPerReplica=4,
+                memoryPerReplicaGb=8
+            ),
+            healthCheck=Doc5HealthCheck(
+                intervalSeconds=10,
+                endpoint="/health"
+            ),
+            consumesTopics=["orders.submitted"],
+            producesTopics=["orders.validated", "orders.rejected"],
+            dependencies=[
+                Doc5Dependency(
+                    name="inventory database",
+                    type="database",
+                    technology="PostgreSQL",
+                    version="16.2",
+                    instanceClass="db.r6g.xlarge",
+                    readReplicas=2
+                ),
+                Doc5Dependency(
+                    name="fraud scoring API",
+                    type="external-api",
+                    slaMs=200
+                )
+            ]
+        ),
+        Doc5Service(
+            name="Fulfillment Engine",
+            language="Python",
+            languageVersion="3.12",
+            compute=Doc5Compute(
+                minReplicas=2,
+                maxReplicas=10,
+                scalingMetric="queue-depth",
+                scalingThreshold=500,
+                cpuPerReplica=2,
+                memoryPerReplicaGb=4
+            ),
+            healthCheck=Doc5HealthCheck(
+                intervalSeconds=20,
+                endpoint="/ready"
+            ),
+            consumesTopics=["orders.validated"],
+            producesTopics=["orders.fulfilled"],
+            dependencies=[
+                Doc5Dependency(
+                    name="warehouse database",
+                    type="database",
+                    technology="PostgreSQL",
+                    version="16.2",
+                    instanceClass="db.r6g.large",
+                    readReplicas=1
+                ),
+                Doc5Dependency(
+                    name="shipping rates API",
+                    type="external-api",
+                    slaMs=350
+                )
+            ]
+        ),
+        Doc5Service(
+            name="Notification Service",
+            language="TypeScript",
+            languageVersion="22",
+            compute=Doc5Compute(
+                minReplicas=2,
+                maxReplicas=8,
+                scalingMetric="cpu",
+                scalingThreshold=75,
+                cpuPerReplica=1,
+                memoryPerReplicaGb=2
+            ),
+            healthCheck=Doc5HealthCheck(
+                intervalSeconds=30,
+                endpoint="/ping"
+            ),
+            consumesTopics=["orders.fulfilled", "orders.rejected"],
+            producesTopics=[],
+            dependencies=[
+                Doc5Dependency(
+                    name="customer preferences database",
+                    type="cache",
+                    technology="Redis",
+                    version="7.2",
+                    shards=3
+                ),
+                Doc5Dependency(
+                    name="email delivery API",
+                    type="external-api",
+                    slaMs=500
+                )
+            ]
+        ),
+        Doc5Service(
+            name="Analytics Collector",
+            language="Scala",
+            languageVersion="3.4",
+            compute=Doc5Compute(
+                minReplicas=2,
+                maxReplicas=6,
+                scalingMetric="cpu",
+                scalingThreshold=80,
+                cpuPerReplica=2,
+                memoryPerReplicaGb=8
+            ),
+            healthCheck=Doc5HealthCheck(
+                intervalSeconds=15,
+                endpoint="/status"
+            ),
+            consumesTopics=[
+                "orders.submitted",
+                "orders.validated",
+                "orders.rejected",
+                "orders.fulfilled"
+            ],
+            producesTopics=[],
+            dependencies=[
+                Doc5Dependency(
+                    name="ClickHouse cluster",
+                    type="database",
+                    technology="ClickHouse",
+                    version="24.1",
+                    instanceClass="3-node cluster"
+                )
+            ]
+        )
+    ],
+    messageBroker=Doc5MessageBroker(
+        technology="Apache Kafka",
+        version="3.7",
+        brokerCount=5,
+        brokerCpus=8,
+        brokerMemoryGb=16,
+        replicationFactor=3,
+        minInSyncReplicas=2,
+        retentionDays=7,
+        topics=[
+            Doc5KafkaTopic(name="orders.submitted", partitions=24),
+            Doc5KafkaTopic(name="orders.validated", partitions=16),
+            Doc5KafkaTopic(name="orders.rejected", partitions=8),
+            Doc5KafkaTopic(name="orders.fulfilled", partitions=16)
+        ]
+    ),
+    monitoring=Doc5Monitoring(
+        metricsSystem="Prometheus",
+        scrapeIntervalSeconds=15,
+        dashboardTool="Grafana",
+        alertingSystem="PagerDuty",
+        escalationPolicy=[
+            Doc5EscalationLevel(priority="P1", responseTimeMinutes=5),
+            Doc5EscalationLevel(priority="P2", responseTimeMinutes=15),
+            Doc5EscalationLevel(priority="P3", responseTimeMinutes=60)
+        ],
+        logging=Doc5LoggingConfig(
+            system="Datadog",
+            retentionDays=30
+        )
+    )
+)

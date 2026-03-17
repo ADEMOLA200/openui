@@ -3,4 +3,6 @@ packages:
   - "lang/*"
   - "examples/**/*"
   - "docs/"
+  - "quality_benchmarks"
   - "!**/src/templates/**"
+  - "!examples/invoices-structured-output"

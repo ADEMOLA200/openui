@@ -1,0 +1,1 @@
+root = T1Item("Wireless Headphones", "electronics", null, 79.99)

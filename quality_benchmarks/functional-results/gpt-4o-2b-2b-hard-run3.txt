@@ -1,0 +1,110 @@
+{
+  "steps": [
+    {
+      "id": "fetch_projects",
+      "method": "GET",
+      "endpoint": "/api/projects"
+    },
+    {
+      "id": "filter_active_projects",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "dependsOn": [
+        "fetch_projects"
+      ],
+      "extract": "$.projects[?(@.status=='active')]"
+    },
+    {
+      "id": "fetch_teams_for_projects",
+      "method": "GET",
+      "endpoint": "/api/teams/{id}",
+      "forEach": "filter_active_projects",
+      "extract": "$.team_ids"
+    },
+    {
+      "id": "fetch_time_entries",
+      "method": "GET",
+      "endpoint": "/api/projects/{id}/time-entries",
+      "queryParams": {
+        "start_date": "2025-10-01",
+        "end_date": "2025-12-31"
+      },
+      "forEach": "filter_active_projects"
+    },
+    {
+      "id": "fetch_project_risks",
+      "method": "GET",
+      "endpoint": "/api/projects/{id}/risks",
+      "forEach": "filter_active_projects"
+    },
+    {
+      "id": "compute_project_metrics",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "dependsOn": [
+        "fetch_time_entries",
+        "fetch_project_risks"
+      ],
+      "extract": "$.projects[*].{id: @.id, total_hours: sum($.entries[*].hours), billable_hours: sum($.entries[?(@.billable==true)].hours), utilization_percent: round((sum($.entries[?(@.billable==true)].hours) / sum($.entries[*].hours)) * 100, 1), unique_contributors: length(distinct($.entries[*].user_id)), open_high_risks: length($.risks[?(@.severity=='high' && @.status=='open')]), budget_consumed_percent: round((sum($.entries[?(@.billable==true)].hours * $.users[?(@.id==@.user_id)].hourly_rate) / @.budget) * 100, 1)}"
+    },
+    {
+      "id": "classify_projects",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "dependsOn": [
+        "compute_project_metrics"
+      ],
+      "extract": "$.projects[*].{id: @.id, classification: if (@.utilization_percent >= 70 && @.open_high_risks == 0 && @.budget_consumed_percent <= 85, 'on-track', if (@.utilization_percent >= 50 && (@.open_high_risks > 0 || @.budget_consumed_percent > 85), 'at-risk', 'critical'))}"
+    },
+    {
+      "id": "fetch_owner_details",
+      "method": "GET",
+      "endpoint": "/api/users/{id}",
+      "forEach": "classify_projects",
+      "condition": "@.classification == 'at-risk' || @.classification == 'critical'",
+      "extract": "$.owner_id"
+    },
+    {
+      "id": "fetch_team_leads",
+      "method": "GET",
+      "endpoint": "/api/users/{id}",
+      "forEach": "fetch_teams_for_projects",
+      "condition": "@.classification == 'at-risk' || @.classification == 'critical'",
+      "extract": "$.lead_id"
+    },
+    {
+      "id": "generate_report",
+      "method": "POST",
+      "endpoint": "/api/reports/generate",
+      "dependsOn": [
+        "fetch_owner_details",
+        "fetch_team_leads"
+      ],
+      "body": {
+        "title": "Q4 2025 Project Health Report",
+        "sections": [
+          {
+            "heading": "{project_name}",
+            "content": "Classification: {classification}, Total Hours: {total_hours}, Utilization Percent: {utilization_percent}, Open High Risks: {open_high_risks}, Budget Consumed Percent: {budget_consumed_percent}, Owner: {owner_name}, Team Leads: {team_leads_names}"
+          }
+        ],
+        "recipients": "{unique_emails_of_owners_and_team_leads}"
+      }
+    },
+    {
+      "id": "send_slack_notification",
+      "method": "POST",
+      "endpoint": "/api/notifications/slack",
+      "dependsOn": [
+        "generate_report"
+      ],
+      "body": {
+        "channel": "#project-health",
+        "message": "Q4 Project Health Report generated: {report_url}. {count} projects flagged."
+      }
+    }
+  ],
+  "output": {
+    "format": "{report_id: generate_report.report_id, report_url: generate_report.url, flagged_project_count: length(classify_projects[?(@.classification=='at-risk' || @.classification=='critical')]), flagged_projects: classify_projects[?(@.classification=='at-risk' || @.classification=='critical')].{project_name: @.name, classification: @.classification, owner_name: fetch_owner_details.name, utilization_percent: @.utilization_percent, budget_consumed_percent: @.budget_consumed_percent, open_high_risks: @.open_high_risks}}"
+  }
+}

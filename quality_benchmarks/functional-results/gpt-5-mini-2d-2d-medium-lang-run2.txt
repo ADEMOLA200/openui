@@ -1,0 +1,44 @@
+root = DeploymentConfig("TaskBoard", [webFrontend, apiServer, worker, database, cache], [ingressWeb], [dbVolume], [npWebToApi, npApiToDbCache, npWorkerToDbCache, npDenyWebToDbCache, npDenyReachWorker], [taskboardSecrets])
+webFrontend = ContainerSpec("web-frontend", "taskboard/web:3.2.1", 2, webResources, [webPort], [envApiUrl, envNodeEnv], webHealth, "public")
+apiServer = ContainerSpec("api-server", "taskboard/api:3.2.1", 3, apiResources, [apiPort], [envDatabaseUrlApi, envRedisUrlApi, envJwtSecret], apiHealth, "internal")
+worker = ContainerSpec("worker", "taskboard/worker:3.2.1", 2, workerResources, [], [envDatabaseUrlWorker, envRedisUrlWorker, envWorkerConcurrency], null, "internal")
+database = ContainerSpec("database", "postgres:16", 1, dbResources, [dbPort], [envPostgresDb, envPostgresUser, envPostgresPassword], null, "internal")
+cache = ContainerSpec("redis", "redis:7.2", 1, cacheResources, [cachePort], [], null, "internal")
+
+webResources = Resources(512, 0.5)
+apiResources = Resources(1024, 1)
+workerResources = Resources(768, 0.5)
+dbResources = Resources(2048, 1)
+cacheResources = Resources(512, 0.25)
+
+webPort = Port(3000, "TCP")
+apiPort = Port(8080, "TCP")
+dbPort = Port(5432, "TCP")
+cachePort = Port(6379, "TCP")
+
+envApiUrl = EnvVar("API_URL", null, null, "http://api-server:8080")
+envNodeEnv = EnvVar("NODE_ENV", "production", null, null)
+envDatabaseUrlApi = EnvVar("DATABASE_URL", "postgresql://database:5432/taskboard", null, null)
+envRedisUrlApi = EnvVar("REDIS_URL", "redis://cache:6379", null, null)
+envJwtSecret = EnvVar("JWT_SECRET", null, SecretRef("taskboard-secrets", "jwt-secret"), null)
+envDatabaseUrlWorker = EnvVar("DATABASE_URL", "postgresql://database:5432/taskboard", null, null)
+envRedisUrlWorker = EnvVar("REDIS_URL", "redis://cache:6379", null, null)
+envWorkerConcurrency = EnvVar("WORKER_CONCURRENCY", "5", null, null)
+envPostgresDb = EnvVar("POSTGRES_DB", "taskboard", null, null)
+envPostgresUser = EnvVar("POSTGRES_USER", "taskboard", null, null)
+envPostgresPassword = EnvVar("POSTGRES_PASSWORD", null, SecretRef("taskboard-secrets", "db-password"), null)
+
+webHealth = HealthCheck("http", "/health", 3000, 30, 5, 3)
+apiHealth = HealthCheck("http", "/api/health", 8080, 15, 3, 2)
+
+ingressWeb = IngressRule("taskboard.example.com", "web-frontend", 3000, true)
+
+dbVolume = PersistentVolume("db-data", "database", 20, "standard", "/var/lib/postgresql/data")
+
+npWebToApi = NetworkPolicy("np-web-to-api", "web-frontend", ["api-server"], [])
+npApiToDbCache = NetworkPolicy("np-api-to-db-cache", "api-server", ["web-frontend"], ["database", "cache"])
+npWorkerToDbCache = NetworkPolicy("np-worker-to-db-cache", "worker", [], ["database", "cache"])
+npDenyWebToDbCache = NetworkPolicy("np-deny-web-to-db-cache", "web-frontend", [], [])
+npDenyReachWorker = NetworkPolicy("np-deny-reach-worker", "worker", [], [])
+
+taskboardSecrets = Secret("taskboard-secrets", ["jwt-secret", "db-password"])

@@ -1,0 +1,32 @@
+root = Workflow([fetch_projects, filter_active_projects, iterate_active_projects, collect_flagged_projects, prepare_report_body, generate_report, notify_slack, output], WorkflowOutput("({\"report_id\": ${generate_report.response.report_id}, \"report_url\": ${generate_report.response.url}, \"flagged_project_count\": ${collect_flagged_projects.flagged_count}, \"flagged_projects\": ${collect_flagged_projects.flagged_summaries}})"))
+
+fetch_projects = ApiCall("fetch_projects", "GET", "/api/projects", null, null, null, null, null, "$.projects")
+
+filter_active_projects = ApiCall("filter_active_projects", "GET", "/api/projects", null, null, "fetch_projects", null, "true", "$.projects[?(@.status==\"active\")]")
+
+iterate_active_projects = ApiCall("iterate_active_projects", "GET", "/api/projects/{id}", null, null, "filter_active_projects", "filter_active_projects.projects", null, "$.projects")
+project_loop = iterate_active_projects
+
+fetch_project_teams = ApiCall("fetch_project_teams", "GET", "/api/teams/{id}", null, null, "iterate_active_projects", "iterate_active_projects.projects", null, "$.teams")
+
+fetch_time_entries = ApiCall("fetch_time_entries", "GET", "/api/projects/{id}/time-entries", {"start_date":"2025-10-01","end_date":"2025-12-31"}, null, "iterate_active_projects", "iterate_active_projects.projects", null, "$.entries")
+
+fetch_project_risks = ApiCall("fetch_project_risks", "GET", "/api/projects/{id}/risks", null, null, "iterate_active_projects", "iterate_active_projects.projects", null, "$.risks")
+
+-- The above endpoints will be iterated per project; aggregate into project_analysis via a synthetic step
+project_analysis = ApiCall("project_analysis", "GET", "/api/projects", null, null, "fetch_project_teams", null, null, "$.projects")
+
+collect_user_details = ApiCall("collect_user_details", "GET", "/api/users/{id}", null, null, "project_analysis", null, null, "$")
+
+compute_metrics = ApiCall("compute_metrics", "GET", "/api/projects", null, null, "fetch_time_entries", null, null, "$.projects")
+
+collect_flagged_projects = ApiCall("collect_flagged_projects", "GET", "/api/projects", null, null, "compute_metrics", null, null, "$.flagged_summary")
+
+prepare_report_body = ApiCall("prepare_report_body", "POST", "/api/reports/generate", null, {"title":"Q4 2025 Project Health Report","sections":[],"recipients":[]}, "collect_flagged_projects", null, null, "$.report_request")
+
+generate_report = ApiCall("generate_report", "POST", "/api/reports/generate", null, null, "prepare_report_body", null, null, "$")
+
+notify_slack = ApiCall("notify_slack", "POST", "/api/notifications/slack", null, {"channel":"#project-health","message":""}, "generate_report", null, null, "$")
+
+output = ApiCall("output", "GET", "/api/projects", null, null, "generate_report", null, null, "$")
+

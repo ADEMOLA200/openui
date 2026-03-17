@@ -1,0 +1,17 @@
+root = StateMachine("order_lifecycle", "draft", ["delivered", "cancelled", "refunded"], ["draft", "submitted", "payment_pending", "payment_failed", "confirmed", "processing", "shipped", "delivered", "cancelled", "refund_pending", "refunded"], [t_draft_submitted, t_submitted_payment_pending, t_submitted_cancelled, t_initiate_payment, t_payment_success, t_payment_declined, t_retry_payment, t_payment_failed_cancel, t_confirmed_processing, t_processing_shipped, t_shipped_delivered, t_delivered_refund_pending, t_refund_process, t_refund_deny, t_confirmed_cancel])
+
+t_draft_submitted = Transition("draft", "submitted", "place_order", "items_count > 0", "validate_order_items_and_reserve_inventory")
+t_submitted_payment_pending = Transition("submitted", "payment_pending", "initiate_payment", null, "start_payment_flow")
+t_initiate_payment = t_submitted_payment_pending
+t_payment_success = Transition("payment_pending", "confirmed", "payment_success", null, "capture_payment_and_send_confirmation_email")
+t_payment_declined = Transition("payment_pending", "payment_failed", "payment_declined", null, "notify_payment_failure")
+t_retry_payment = Transition("payment_failed", "payment_pending", "retry_payment", "retry_count < 3", "increment_retry_and_restart_payment")
+t_payment_failed_cancel = Transition("payment_failed", "cancelled", "cancel_order", null, "release_reserved_inventory_and_notify_customer")
+t_submitted_cancelled = Transition("submitted", "cancelled", "cancel_order", null, "cancel_order_and_release_inventory")
+t_confirmed_processing = Transition("confirmed", "processing", "start_processing", null, "allocate_inventory_and_create_pick_pack")
+t_processing_shipped = Transition("processing", "shipped", "ship_order", "tracking_number != \"\"", "generate_shipment_and_notify_carrier")
+t_shipped_delivered = Transition("shipped", "delivered", "confirm_delivery", null, "confirm_delivery_and_send_receipt")
+t_delivered_refund_pending = Transition("delivered", "refund_pending", "request_refund", "days_since_delivery <= 30", "create_refund_request_and_hold_funds")
+t_refund_process = Transition("refund_pending", "refunded", "process_refund", null, "process_refund_and_notify_customer")
+t_refund_deny = Transition("refund_pending", "delivered", "deny_refund", null, "deny_refund_and_notify_customer")
+t_confirmed_cancel = Transition("confirmed", "cancelled", "cancel_order", null, "attempt_refund_and_cancel_fulfillment")

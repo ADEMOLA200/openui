@@ -1,0 +1,105 @@
+{
+  "steps": [
+    {
+      "id": "fetch_projects",
+      "method": "GET",
+      "endpoint": "/api/projects"
+    },
+    {
+      "id": "filter_active_projects",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "extract": "$.projects[?(@.status=='active')]"
+    },
+    {
+      "id": "fetch_teams",
+      "method": "GET",
+      "endpoint": "/api/teams/{id}",
+      "forEach": "filter_active_projects",
+      "dependsOn": ["filter_active_projects"],
+      "extract": "$.team_ids"
+    },
+    {
+      "id": "fetch_time_entries",
+      "method": "GET",
+      "endpoint": "/api/projects/{id}/time-entries",
+      "queryParams": {
+        "start_date": "2025-10-01",
+        "end_date": "2025-12-31"
+      },
+      "forEach": "filter_active_projects",
+      "dependsOn": ["filter_active_projects"]
+    },
+    {
+      "id": "fetch_risks",
+      "method": "GET",
+      "endpoint": "/api/projects/{id}/risks",
+      "forEach": "filter_active_projects",
+      "dependsOn": ["filter_active_projects"]
+    },
+    {
+      "id": "compute_project_metrics",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "forEach": "filter_active_projects",
+      "dependsOn": ["fetch_time_entries", "fetch_risks"],
+      "extract": "$.projects[*].{total_hours: sum($.entries[*].hours), billable_hours: sum($.entries[?(@.billable==true)].hours), utilization_percent: round((sum($.entries[?(@.billable==true)].hours) / sum($.entries[*].hours)) * 100, 1), unique_contributors: length(distinct($.entries[*].user_id)), open_high_risks: length($.risks[?(@.severity=='high' && @.status=='open')]), budget_consumed_percent: round((sum($.entries[?(@.billable==true)].hours * $.users[?(@.id==$.entries[*].user_id)].hourly_rate) / $.budget) * 100, 1)}"
+    },
+    {
+      "id": "classify_projects",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "forEach": "compute_project_metrics",
+      "dependsOn": ["compute_project_metrics"],
+      "extract": "$.projects[*].{classification: if($.utilization_percent >= 70 && $.open_high_risks == 0 && $.budget_consumed_percent <= 85, 'on-track', if($.utilization_percent >= 50 && ($.open_high_risks > 0 || $.budget_consumed_percent > 85), 'at-risk', 'critical'))}"
+    },
+    {
+      "id": "fetch_owner_details",
+      "method": "GET",
+      "endpoint": "/api/users/{id}",
+      "forEach": "classify_projects",
+      "dependsOn": ["classify_projects"],
+      "condition": "$.classification in ['at-risk', 'critical']",
+      "extract": "$.owner_id"
+    },
+    {
+      "id": "fetch_team_leads",
+      "method": "GET",
+      "endpoint": "/api/users/{id}",
+      "forEach": "fetch_teams",
+      "dependsOn": ["fetch_teams"],
+      "condition": "$.classification in ['at-risk', 'critical']",
+      "extract": "$.lead_id"
+    },
+    {
+      "id": "generate_report",
+      "method": "POST",
+      "endpoint": "/api/reports/generate",
+      "dependsOn": ["fetch_owner_details", "fetch_team_leads"],
+      "body": {
+        "title": "Q4 2025 Project Health Report",
+        "sections": [
+          {
+            "heading": "{project_name}",
+            "content": "Classification: {classification}, Total Hours: {total_hours}, Utilization: {utilization_percent}%, Open High Risks: {open_high_risks}, Budget Consumed: {budget_consumed_percent}%, Owner: {owner_name}, Team Leads: {team_leads_names}"
+          }
+        ],
+        "recipients": "{unique_emails}"
+      },
+      "extract": "$.report_id, $.url"
+    },
+    {
+      "id": "send_slack_notification",
+      "method": "POST",
+      "endpoint": "/api/notifications/slack",
+      "dependsOn": ["generate_report"],
+      "body": {
+        "channel": "#project-health",
+        "message": "Q4 Project Health Report generated: {report_url}. {count} projects flagged."
+      }
+    }
+  ],
+  "output": {
+    "format": "{report_id, report_url, flagged_project_count, flagged_projects: [{project_name, classification, owner_name, utilization_percent, budget_consumed_percent, open_high_risks}]}"
+  }
+}

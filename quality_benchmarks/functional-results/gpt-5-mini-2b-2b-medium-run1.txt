@@ -1,0 +1,104 @@
+{
+  "steps": [
+    {
+      "id": "fetch_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "extract": "$.users"
+    },
+    {
+      "id": "filter_active_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "fetch_users"
+      ],
+      "forEach": "steps.fetch_users.response", 
+      "condition": "item.active == true",
+      "extract": "$.item"
+    },
+    {
+      "id": "fetch_user_purchases",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}/purchases",
+      "dependsOn": [
+        "filter_active_users"
+      ],
+      "forEach": "steps.filter_active_users.extract",
+      "queryParams": {
+        "since": "2025-01-01",
+        "min_amount": "500"
+      },
+      "body": {},
+      "extract": "$.purchases",
+      "condition": "true"
+    },
+    {
+      "id": "count_qualifying_purchases",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "fetch_user_purchases"
+      ],
+      "forEach": "steps.fetch_user_purchases.extract",
+      "extract": "$.length",
+      "condition": "true"
+    },
+    {
+      "id": "select_users_with_3plus",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "count_qualifying_purchases",
+        "filter_active_users",
+        "fetch_user_purchases"
+      ],
+      "forEach": "steps.filter_active_users.extract",
+      "condition": "steps.fetch_user_purchases.forEachItem.purchases.length >= 3",
+      "extract": "$.item"
+    },
+    {
+      "id": "fetch_department_for_user",
+      "method": "GET",
+      "endpoint": "/api/departments/{department_id}",
+      "dependsOn": [
+        "select_users_with_3plus"
+      ],
+      "forEach": "steps.select_users_with_3plus.extract",
+      "extract": "$",
+      "condition": "true"
+    },
+    {
+      "id": "send_notification_email",
+      "method": "POST",
+      "endpoint": "/api/notifications/email",
+      "dependsOn": [
+        "fetch_department_for_user",
+        "select_users_with_3plus",
+        "fetch_user_purchases"
+      ],
+      "forEach": "steps.select_users_with_3plus.extract",
+      "body": {
+        "to": "{item.email}",
+        "subject": "Loyalty Reward — {steps.fetch_department_for_user.forEachItem.name}",
+        "body": "Hi {item.name}, you have made {steps.fetch_user_purchases.forEachItem.purchases.length} qualifying purchases. You are eligible for our loyalty program."
+      },
+      "extract": "$.notification_id"
+    },
+    {
+      "id": "assemble_summary",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "send_notification_email",
+        "fetch_department_for_user",
+        "select_users_with_3plus",
+        "fetch_user_purchases"
+      ],
+      "extract": "steps.select_users_with_3plus.extract.map((u, idx) => ({ user_name: u.name, email: u.email, department_name: steps.fetch_department_for_user.forEachResponses[idx].name, purchase_count: steps.fetch_user_purchases.forEachResponses[idx].purchases.length, notification_id: steps.send_notification_email.forEachResponses[idx].notification_id }))"
+    }
+  ],
+  "output": {
+    "format": "steps.assemble_summary.extract"
+  }
+}

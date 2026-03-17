@@ -1,0 +1,44 @@
+```
+root = Pipeline(steps, outputColumns)
+
+steps = [
+    filterActive,
+    filterHireDate,
+    computeFullName,
+    computeAnnualBonus,
+    aggregateByDepartment,
+    sortByTotalBonus
+]
+
+filterActive = TransformStep("filter", filterActiveParams)
+filterHireDate = TransformStep("filter", filterHireDateParams)
+computeFullName = TransformStep("compute", computeFullNameParams)
+computeAnnualBonus = TransformStep("compute", computeAnnualBonusParams)
+aggregateByDepartment = TransformStep("aggregate", aggregateByDepartmentParams)
+sortByTotalBonus = TransformStep("sort", sortByTotalBonusParams)
+
+filterActiveParams = TransformParams("status", "eq", "active")
+filterHireDateParams = TransformParams("hire_date", "before", "2024-01-01")
+
+computeFullNameParams = TransformParams(null, null, null, "full_name", "first_name + ' ' + last_name")
+
+computeAnnualBonusParams = TransformParams(null, null, null, "annual_bonus", null, conditions, "0")
+
+conditions = [
+    Condition("performance_rating >= 4.5", "salary * 0.15"),
+    Condition("performance_rating >= 3.5", "salary * 0.10"),
+    Condition("performance_rating >= 2.5", "salary * 0.05")
+]
+
+aggregateByDepartmentParams = TransformParams(null, null, null, null, null, null, "department", metrics)
+
+metrics = [
+    Metric("employee_count", "count"),
+    Metric("avg_salary", "avg", "salary", null, 0),
+    Metric("total_bonus", "sum", "annual_bonus", null, 0)
+]
+
+sortByTotalBonusParams = TransformParams(null, null, null, null, null, null, null, null, "total_bonus", "desc")
+
+outputColumns = ["department", "employee_count", "avg_salary", "total_bonus"]
+```

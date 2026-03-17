@@ -1,0 +1,12 @@
+root = Doc2JobPosting("MHS-ENG-2026-0087", "Meridian Health Systems", "Senior Data Engineer", "2026-03-03", "2026-04-18", location, "full-time", "permanent", "hybrid", 3, reportingTo, "IC4", compensation, requirements, benefits)
+location = Doc2Location("200 Clarendon Street", "Suite 1400", "Boston", "MA", "02116")
+reportingTo = Doc2ReportingTo("Priya Nair", "Director of Data Infrastructure")
+compensation = Doc2Compensation(145000, 178000, 15)
+requirements = Doc2Requirements(6, ["Apache Spark", "Apache Kafka", "Python", "SQL", "AWS"], ["dbt", "Terraform", "Apache Airflow"], false)
+benefits = [medicalBenefit, dentalBenefit, retirementBenefit, ptoBenefit, educationBenefit, relocationBenefit]
+medicalBenefit = Doc2Benefit("medical", 250, null)
+dentalBenefit = Doc2Benefit("dental", 35, null)
+retirementBenefit = Doc2Benefit("retirement", null, 4)
+ptoBenefit = Doc2Benefit("pto", null, 22)
+educationBenefit = Doc2Benefit("education", null, 3000)
+relocationBenefit = Doc2Benefit("relocation", null, 12000)

@@ -1,0 +1,4 @@
+root = T4Service("Validation Service", [dep1, dep2, dep3])
+dep1 = T4Dependency("inventory database", "database", null)
+dep2 = T4Dependency("fraud scoring API", "external-api", 200)
+dep3 = T4Dependency("customer preferences cache", "cache", null)

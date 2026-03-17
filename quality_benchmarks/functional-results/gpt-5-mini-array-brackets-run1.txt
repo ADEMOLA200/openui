@@ -1,0 +1,4 @@
+root = T2List("Shopping List: Weekly Groceries", [item1, item2, item3])
+item1 = T2Item("Apples")
+item2 = T2Item("Bananas")
+item3 = T2Item("Oranges")

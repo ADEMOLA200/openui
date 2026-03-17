@@ -1,0 +1,211 @@
+{
+  "appName": "TaskBoard",
+  "services": [
+    {
+      "name": "Web Frontend",
+      "image": "taskboard/web:3.2.1",
+      "replicas": 2,
+      "resources": {
+        "memoryMb": 512,
+        "cpuCores": 0.5
+      },
+      "ports": [
+        {
+          "containerPort": 3000,
+          "protocol": "TCP"
+        }
+      ],
+      "envVars": [
+        {
+          "name": "API_URL",
+          "serviceRef": "API Server"
+        },
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        }
+      ],
+      "healthCheck": {
+        "type": "http",
+        "path": "/health",
+        "port": 3000,
+        "intervalSeconds": 30,
+        "timeoutSeconds": 5,
+        "failureThreshold": 3
+      },
+      "expose": "public"
+    },
+    {
+      "name": "API Server",
+      "image": "taskboard/api:3.2.1",
+      "replicas": 3,
+      "resources": {
+        "memoryMb": 1024,
+        "cpuCores": 1
+      },
+      "ports": [
+        {
+          "containerPort": 8080,
+          "protocol": "TCP"
+        }
+      ],
+      "envVars": [
+        {
+          "name": "DATABASE_URL",
+          "serviceRef": "Database"
+        },
+        {
+          "name": "REDIS_URL",
+          "serviceRef": "Cache"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": {
+            "secretName": "taskboard-secrets",
+            "key": "jwt-secret"
+          }
+        }
+      ],
+      "healthCheck": {
+        "type": "http",
+        "path": "/api/health",
+        "port": 8080,
+        "intervalSeconds": 15,
+        "timeoutSeconds": 3,
+        "failureThreshold": 2
+      },
+      "expose": "internal"
+    },
+    {
+      "name": "Background Worker",
+      "image": "taskboard/worker:3.2.1",
+      "replicas": 2,
+      "resources": {
+        "memoryMb": 768,
+        "cpuCores": 0.5
+      },
+      "ports": [],
+      "envVars": [
+        {
+          "name": "DATABASE_URL",
+          "serviceRef": "Database"
+        },
+        {
+          "name": "REDIS_URL",
+          "serviceRef": "Cache"
+        },
+        {
+          "name": "WORKER_CONCURRENCY",
+          "value": "5"
+        }
+      ],
+      "expose": "none"
+    },
+    {
+      "name": "Database",
+      "image": "postgres:16",
+      "replicas": 1,
+      "resources": {
+        "memoryMb": 2048,
+        "cpuCores": 1
+      },
+      "ports": [
+        {
+          "containerPort": 5432,
+          "protocol": "TCP"
+        }
+      ],
+      "envVars": [
+        {
+          "name": "POSTGRES_DB",
+          "value": "taskboard"
+        },
+        {
+          "name": "POSTGRES_USER",
+          "value": "taskboard"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "valueFrom": {
+            "secretName": "taskboard-secrets",
+            "key": "db-password"
+          }
+        }
+      ],
+      "expose": "internal"
+    },
+    {
+      "name": "Cache",
+      "image": "redis:7.2",
+      "replicas": 1,
+      "resources": {
+        "memoryMb": 512,
+        "cpuCores": 0.25
+      },
+      "ports": [
+        {
+          "containerPort": 6379,
+          "protocol": "TCP"
+        }
+      ],
+      "envVars": [],
+      "expose": "internal"
+    }
+  ],
+  "ingress": [
+    {
+      "domain": "taskboard.example.com",
+      "serviceName": "Web Frontend",
+      "servicePort": 3000,
+      "tlsEnabled": true
+    }
+  ],
+  "volumes": [
+    {
+      "name": "Database Storage",
+      "serviceName": "Database",
+      "sizeGb": 20,
+      "storageClass": "standard",
+      "mountPath": "/var/lib/postgresql/data"
+    }
+  ],
+  "networkPolicies": [
+    {
+      "name": "Web Frontend Policy",
+      "target": "Web Frontend",
+      "allowIngressFrom": [],
+      "allowEgressTo": [
+        "API Server"
+      ]
+    },
+    {
+      "name": "API Server Policy",
+      "target": "API Server",
+      "allowIngressFrom": [
+        "Web Frontend"
+      ],
+      "allowEgressTo": [
+        "Database",
+        "Cache"
+      ]
+    },
+    {
+      "name": "Background Worker Policy",
+      "target": "Background Worker",
+      "allowIngressFrom": [],
+      "allowEgressTo": [
+        "Database",
+        "Cache"
+      ]
+    }
+  ],
+  "secrets": [
+    {
+      "name": "taskboard-secrets",
+      "keys": [
+        "jwt-secret",
+        "db-password"
+      ]
+    }
+  ]
+}

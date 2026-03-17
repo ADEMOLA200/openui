@@ -1,9 +1,9 @@
 import { z } from "zod";
 import type { Model } from "./defineModel";
-import { collectModels } from "./utils/collectModels";
 import { compileSchema, createStreamParser, parse, type ZodSchemaMap } from "./parser/core";
 import { generatePrompt, type PromptOptions } from "./parser/prompt";
 import type { ParseResult, StreamingParser } from "./types";
+import { collectModels } from "./utils/collectModels";
 
 export type { PromptOptions } from "./parser/prompt";
 

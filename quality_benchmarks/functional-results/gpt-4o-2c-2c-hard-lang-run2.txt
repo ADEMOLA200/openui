@@ -1,0 +1,94 @@
+```
+root = HardStateMachine("CI/CD Pipeline", "idle", ["prod_validated", "pipeline_aborted", "rollback_complete"], states, transitions, joinConditions, forkTransitions)
+
+states = [
+    "idle",
+    "source_checkout",
+    "checkout_failed",
+    "build_started",
+    "unit_tests",
+    "lint",
+    "unit_tests_passed",
+    "unit_tests_failed",
+    "lint_passed",
+    "lint_failed",
+    "build_complete",
+    "build_failed",
+    "integration_tests",
+    "integration_passed",
+    "integration_failed",
+    "staging_deploy",
+    "staging_deployed",
+    "staging_deploy_failed",
+    "staging_validation",
+    "staging_validated",
+    "staging_validation_failed",
+    "approval_pending",
+    "approval_granted",
+    "approval_rejected",
+    "prod_deploy",
+    "prod_deployed",
+    "prod_deploy_failed",
+    "prod_validation",
+    "prod_validated",
+    "prod_validation_failed",
+    "rollback_initiated",
+    "rollback_complete",
+    "pipeline_aborted"
+]
+
+transitions = [
+    Transition("idle", "source_checkout", "trigger_pipeline", "branch is not empty"),
+    Transition("source_checkout", "build_started", "checkout_success"),
+    Transition("source_checkout", "checkout_failed", "checkout_error"),
+    Transition("checkout_failed", "source_checkout", "retry", "retry_count < 2"),
+    Transition("unit_tests", "unit_tests_passed", "tests_pass"),
+    Transition("unit_tests", "unit_tests_failed", "tests_fail"),
+    Transition("lint", "lint_passed", "lint_pass"),
+    Transition("lint", "lint_failed", "lint_fail"),
+    Transition("build_complete", "integration_tests", "start_integration"),
+    Transition("build_failed", "idle", "reset_pipeline"),
+    Transition("integration_tests", "integration_passed", "integration_pass"),
+    Transition("integration_tests", "integration_failed", "integration_fail"),
+    Transition("integration_failed", "integration_tests", "retry", "retry_count < 2"),
+    Transition("integration_passed", "staging_deploy", "deploy_staging"),
+    Transition("staging_deploy", "staging_deployed", "staging_deploy_success"),
+    Transition("staging_deploy", "staging_deploy_failed", "staging_deploy_error"),
+    Transition("staging_deploy_failed", "staging_deploy", "retry", "retry_count < 2"),
+    Transition("staging_deployed", "staging_validation", "validate_staging"),
+    Transition("staging_validation", "staging_validated", "staging_checks_pass"),
+    Transition("staging_validation", "staging_validation_failed", "staging_checks_fail"),
+    Transition("staging_validation_failed", "staging_deploy", "redeploy_staging"),
+    Transition("staging_validated", "approval_pending", "request_approval"),
+    Transition("approval_pending", "approval_granted", "approve", "approver_role == \"lead\" OR approver_role == \"admin\""),
+    Transition("approval_pending", "approval_rejected", "reject"),
+    Transition("approval_rejected", "idle", "reset_pipeline"),
+    Transition("approval_granted", "prod_deploy", "deploy_production"),
+    Transition("prod_deploy", "prod_deployed", "prod_deploy_success"),
+    Transition("prod_deploy", "prod_deploy_failed", "prod_deploy_error"),
+    Transition("prod_deploy_failed", "rollback_initiated", "initiate_rollback"),
+    Transition("prod_deployed", "prod_validation", "validate_production"),
+    Transition("prod_validation", "prod_validated", "prod_checks_pass"),
+    Transition("prod_validation", "prod_validation_failed", "prod_checks_fail"),
+    Transition("prod_validation_failed", "rollback_initiated", "initiate_rollback"),
+    Transition("rollback_initiated", "rollback_complete", "rollback_success"),
+    Transition("rollback_complete", "idle", "reset_pipeline"),
+    Transition("source_checkout", "pipeline_aborted", "abort"),
+    Transition("build_started", "pipeline_aborted", "abort"),
+    Transition("unit_tests", "pipeline_aborted", "abort"),
+    Transition("lint", "pipeline_aborted", "abort"),
+    Transition("integration_tests", "pipeline_aborted", "abort"),
+    Transition("staging_deploy", "pipeline_aborted", "abort"),
+    Transition("staging_validation", "pipeline_aborted", "abort"),
+    Transition("approval_pending", "pipeline_aborted", "abort"),
+    Transition("prod_deploy", "pipeline_aborted", "abort")
+]
+
+joinConditions = [
+    JoinCondition("build_complete", ["unit_tests_passed", "lint_passed"], "build_failed", ["unit_tests_failed", "lint_failed"])
+]
+
+forkTransitions = [
+    ForkTransition("build_started", ["unit_tests", "lint"], "start_parallel_build")
+]
+```

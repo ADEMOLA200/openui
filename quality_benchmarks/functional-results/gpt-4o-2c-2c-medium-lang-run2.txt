@@ -1,0 +1,19 @@
+```
+root = StateMachine("OrderLifecycle", "draft", ["delivered", "cancelled", "refunded"], ["draft", "submitted", "payment_pending", "payment_failed", "confirmed", "processing", "shipped", "delivered", "cancelled", "refund_pending", "refunded"], [transition1, transition2, transition3, transition4, transition5, transition6, transition7, transition8, transition9, transition10, transition11, transition12, transition13, transition14, transition15])
+
+transition1 = Transition("draft", "submitted", "place_order", "items_count > 0", "validate_order")
+transition2 = Transition("submitted", "payment_pending", "initiate_payment", null, "charge_payment")
+transition3 = Transition("payment_pending", "confirmed", "payment_success", null, "send_confirmation_email")
+transition4 = Transition("payment_pending", "payment_failed", "payment_declined", null, "notify_payment_failure")
+transition5 = Transition("payment_failed", "payment_pending", "retry_payment", "retry_count < 3", "retry_charge_payment")
+transition6 = Transition("payment_failed", "cancelled", "cancel_order", null, "release_inventory")
+transition7 = Transition("confirmed", "processing", "start_processing", null, "prepare_order")
+transition8 = Transition("processing", "shipped", "ship_order", "tracking_number is not empty", "handover_to_carrier")
+transition9 = Transition("shipped", "delivered", "confirm_delivery", null, "confirm_order_delivery")
+transition10 = Transition("delivered", "refund_pending", "request_refund", "days_since_delivery <= 30", "initiate_refund_process")
+transition11 = Transition("refund_pending", "refunded", "process_refund", null, "complete_refund")
+transition12 = Transition("refund_pending", "delivered", "deny_refund", null, "notify_refund_denial")
+transition13 = Transition("submitted", "cancelled", "cancel_order", null, "release_inventory")
+transition14 = Transition("payment_pending", "cancelled", "cancel_order", null, "release_inventory")
+transition15 = Transition("confirmed", "cancelled", "cancel_order", null, "release_inventory")
+```

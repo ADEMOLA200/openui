@@ -1,0 +1,131 @@
+{
+  "steps": [
+    {
+      "id": "fetch_projects",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "extract": "$.projects"
+    },
+    {
+      "id": "filter_active_projects",
+      "method": "GET",
+      "endpoint": "/api/projects", 
+      "dependsOn": [
+        "fetch_projects"
+      ],
+      "condition": "$.fetch_projects.projects != null",
+      "extract": "$.fetch_projects.projects[?(@.status=='active')]"
+    },
+    {
+      "id": "for_each_active_project",
+      "method": "GET",
+      "endpoint": "/api/projects/{project_id}/time-entries",
+      "forEach": "$.filter_active_projects",
+      "dependsOn": [
+        "filter_active_projects"
+      ],
+      "queryParams": {
+        "start_date": "2025-10-01",
+        "end_date": "2025-12-31"
+      },
+      "extract": "$.entries"
+    },
+    {
+      "id": "fetch_project_teams_for_each",
+      "method": "GET",
+      "endpoint": "/api/teams/{team_id}",
+      "forEach": "$.for_each_active_project.[].{project_id: @.project_id, team_ids: @.project.team_ids}",
+      "dependsOn": [
+        "for_each_active_project",
+        "filter_active_projects"
+      ],
+      "extract": "$.for_each_active_project.team_ids"
+    },
+    {
+      "id": "fetch_project_risks_for_each",
+      "method": "GET",
+      "endpoint": "/api/projects/{project_id}/risks",
+      "forEach": "$.filter_active_projects",
+      "dependsOn": [
+        "filter_active_projects"
+      ],
+      "extract": "$.risks"
+    },
+    {
+      "id": "aggregate_time_and_risks_per_project",
+      "method": "GET",
+      "endpoint": "/api/projects/{project_id}",
+      "forEach": "$.filter_active_projects",
+      "dependsOn": [
+        "for_each_active_project",
+        "fetch_project_risks_for_each",
+        "filter_active_projects"
+      ],
+      "extract": "$.this_project_aggregation"
+    },
+    {
+      "id": "fetch_unique_contributor_rates",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}",
+      "forEach": "$.aggregate_time_and_risks_per_project.unique_contributor_ids",
+      "dependsOn": [
+        "aggregate_time_and_risks_per_project"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "classify_and_compute_metrics",
+      "method": "GET",
+      "endpoint": "/api/projects/{project_id}",
+      "forEach": "$.filter_active_projects",
+      "dependsOn": [
+        "for_each_active_project",
+        "fetch_unique_contributor_rates",
+        "fetch_project_risks_for_each",
+        "filter_active_projects"
+      ],
+      "extract": "$.project_classification"
+    },
+    {
+      "id": "fetch_owner_and_team_leads_for_flagged",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}",
+      "forEach": "$.classify_and_compute_metrics.flagged_people_ids",
+      "dependsOn": [
+        "classify_and_compute_metrics"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "generate_report",
+      "method": "POST",
+      "endpoint": "/api/reports/generate",
+      "dependsOn": [
+        "classify_and_compute_metrics",
+        "fetch_owner_and_team_leads_for_flagged"
+      ],
+      "body": {
+        "title": "Q4 2025 Project Health Report",
+        "sections": "$.classify_and_compute_metrics.report_sections",
+        "recipients": "$.fetch_owner_and_team_leads_for_flagged.[*].email"
+      },
+      "extract": "$"
+    },
+    {
+      "id": "send_slack_notification",
+      "method": "POST",
+      "endpoint": "/api/notifications/slack",
+      "dependsOn": [
+        "generate_report"
+      ],
+      "body": {
+        "channel": "#project-health",
+        "message": "Q4 Project Health Report generated: {{generate_report.url}}. {{classify_and_compute_metrics.flagged_count}} projects flagged."
+      },
+      "extract": "$"
+    }
+  ],
+  "output": {
+    "format": "{ \"report_id\": \"{{generate_report.report_id}}\", \"report_url\": \"{{generate_report.url}}\", \"flagged_project_count\": {{classify_and_compute_metrics.flagged_count}}, \"flagged_projects\": {{classify_and_compute_metrics.flagged_project_summaries}} }"
+  }
+}

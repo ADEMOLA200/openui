@@ -1,0 +1,2 @@
+root = T5Person("Sarah Chen", "sarah.chen@example.com", address)
+address = T5Address("42 Maple Street", "Portland", "OR")

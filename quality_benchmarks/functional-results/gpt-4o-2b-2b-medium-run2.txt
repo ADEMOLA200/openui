@@ -1,0 +1,69 @@
+{
+  "steps": [
+    {
+      "id": "fetch_users",
+      "method": "GET",
+      "endpoint": "/api/users"
+    },
+    {
+      "id": "filter_active_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "fetch_users"
+      ],
+      "extract": "$.users[?(@.active == true)]"
+    },
+    {
+      "id": "fetch_user_purchases",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}/purchases",
+      "queryParams": {
+        "since": "2025-01-01",
+        "min_amount": "500"
+      },
+      "dependsOn": [
+        "filter_active_users"
+      ],
+      "forEach": "$.filter_active_users[*].id",
+      "extract": "$.purchases"
+    },
+    {
+      "id": "identify_qualifying_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "fetch_user_purchases"
+      ],
+      "extract": "$[?(@.purchases.length >= 3)]"
+    },
+    {
+      "id": "fetch_department_info",
+      "method": "GET",
+      "endpoint": "/api/departments/{department_id}",
+      "dependsOn": [
+        "identify_qualifying_users"
+      ],
+      "forEach": "$.identify_qualifying_users[*].department_id",
+      "extract": "$"
+    },
+    {
+      "id": "send_email_notifications",
+      "method": "POST",
+      "endpoint": "/api/notifications/email",
+      "body": {
+        "to": "{user_email}",
+        "subject": "Loyalty Reward — {department_name}",
+        "body": "Hi {user_name}, you have made {purchase_count} qualifying purchases. You are eligible for our loyalty program."
+      },
+      "dependsOn": [
+        "fetch_department_info"
+      ],
+      "forEach": "$.identify_qualifying_users[*]",
+      "extract": "$.notification_id"
+    }
+  ],
+  "output": {
+    "format": "$.send_email_notifications[*].{user_name: @.user_name, email: @.user_email, department_name: @.department_name, purchase_count: @.purchase_count, notification_id: @.notification_id}"
+  }
+}

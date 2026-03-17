@@ -1,0 +1,70 @@
+{
+  "requisitionId": "MHS-ENG-2026-0087",
+  "company": "Meridian Health Systems",
+  "title": "Senior Data Engineer",
+  "postedDate": "2026-03-03",
+  "closingDate": "2026-04-18",
+  "location": {
+    "street": "200 Clarendon Street",
+    "suite": "Suite 1400",
+    "city": "Boston",
+    "state": "MA",
+    "zipCode": "02116"
+  },
+  "employmentType": "full-time",
+  "positionType": "permanent",
+  "workModel": "hybrid",
+  "onsiteDaysPerWeek": 3,
+  "reportingTo": {
+    "name": "Priya Nair",
+    "title": "Director of Data Infrastructure"
+  },
+  "level": "IC4",
+  "compensation": {
+    "salaryMin": 145000,
+    "salaryMax": 178000,
+    "bonusMaxPercent": 15
+  },
+  "requirements": {
+    "minYearsExperience": 6,
+    "mandatorySkills": [
+      "Apache Spark",
+      "Apache Kafka",
+      "Python",
+      "SQL",
+      "AWS"
+    ],
+    "preferredSkills": [
+      "dbt",
+      "Terraform",
+      "Apache Airflow"
+    ],
+    "visaSponsorship": false
+  },
+  "benefits": [
+    {
+      "type": "medical",
+      "monthlyEmployeeCost": 250
+    },
+    {
+      "type": "dental",
+      "monthlyEmployeeCost": 35
+    },
+    {
+      "type": "retirement",
+      "annualValue": 0
+    },
+    {
+      "type": "pto",
+      "annualValue": 22
+    },
+    {
+      "type": "education",
+      "annualValue": 3000
+    },
+    {
+      "type": "relocation",
+      "annualValue": 12000
+    }
+  ]
+}

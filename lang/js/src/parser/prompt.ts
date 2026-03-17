@@ -1,5 +1,5 @@
 import type { Model } from "../defineModel";
-import { isArrayType, isOptionalType, resolveTypeAnnotation } from "../utils/zod";
+import { getFieldDescription, isArrayType, isOptionalType, resolveTypeAnnotation } from "../utils/zod";
 
 export interface PromptOptions {
   preamble?: string;
@@ -29,7 +29,7 @@ Respond using OpenUI Lang, a structured output format. Your ENTIRE response must
 1. Each statement is on its own line: \`identifier = Expression\`
 2. ${rootRule}
 3. Expressions are: strings ("..."), numbers, booleans (true/false), arrays ([...]), objects ({...}), or type calls TypeName(arg1, arg2, ...)
-4. Use references for readability: define \`name = ...\` on one line, then use \`name\` later
+4. Use references for readability: define \`name = TypeName(...)\` on one line, then use \`name\` in the parent. (strings, numbers, booleans) must be inlined directly — do NOT assign them to separate variables.
 5. EVERY variable (except root) MUST be referenced by at least one other variable. Unreferenced variables are silently dropped. Always include defined variables in their parent's children/items array.
 6. Arguments are POSITIONAL (order matters, not names)
 7. Arguments are POSITIONAL — you CANNOT skip optional arguments in the middle. Pass null explicitly for any optional argument you want to omit, e.g. TypeName(arg1, null, arg3).
@@ -58,7 +58,6 @@ function importantRules(root: string | string[] | undefined): string {
 - Write statements in TOP-DOWN order: root → types → data (leverages hoisting)
 - Each statement on its own line
 - No trailing text or explanations — output ONLY OpenUI Lang code
-- Generate realistic/plausible data when extracting information
 - NEVER define a variable without referencing it from the tree. Every variable must be reachable from root.`;
 }
 
@@ -69,6 +68,7 @@ interface FieldInfo {
   isOptional: boolean;
   isArray: boolean;
   typeAnnotation?: string;
+  description?: string;
 }
 
 function analyzeFields(shape: Record<string, unknown>): FieldInfo[] {
@@ -77,6 +77,7 @@ function analyzeFields(shape: Record<string, unknown>): FieldInfo[] {
     isOptional: isOptionalType(schema),
     isArray: isArrayType(schema),
     typeAnnotation: resolveTypeAnnotation(schema),
+    description: getFieldDescription(schema),
   }));
 }
 
@@ -84,13 +85,18 @@ function analyzeFields(shape: Record<string, unknown>): FieldInfo[] {
 
 function buildSignature(typeName: string, fields: FieldInfo[]): string {
   const params = fields.map((f) => {
+    let param: string;
     if (f.typeAnnotation) {
-      return f.isOptional ? `${f.name}?: ${f.typeAnnotation}` : `${f.name}: ${f.typeAnnotation}`;
+      param = f.isOptional ? `${f.name}?: ${f.typeAnnotation}` : `${f.name}: ${f.typeAnnotation}`;
+    } else if (f.isArray) {
+      param = f.isOptional ? `[${f.name}]?` : `[${f.name}]`;
+    } else {
+      param = f.isOptional ? `${f.name}?` : f.name;
     }
-    if (f.isArray) {
-      return f.isOptional ? `[${f.name}]?` : `[${f.name}]`;
+    if (f.description) {
+      param += ` (${f.description})`;
     }
-    return f.isOptional ? `${f.name}?` : f.name;
+    return param;
   });
   return `${typeName}(${params.join(", ")})`;
 }

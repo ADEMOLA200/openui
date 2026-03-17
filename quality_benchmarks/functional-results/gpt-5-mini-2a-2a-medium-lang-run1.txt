@@ -1,0 +1,30 @@
+root = Pipeline([step_filter_status, step_filter_hiredate, step_compute_fullname, step_compute_bonus, step_group_dept, step_sort_totalbonus], ["department", "employee_count", "avg_salary", "total_bonus"])
+step_filter_status = TransformStep("filter", params_filter_status)
+params_filter_status = TransformParams("status", "eq", "active")
+step_filter_hiredate = TransformStep("filter", params_filter_hiredate)
+params_filter_hiredate = TransformParams("hire_date", "before", "2024-01-01")
+step_compute_fullname = TransformStep("compute", params_compute_fullname)
+params_compute_fullname = TransformParams(null, null, null, "full_name", "first_name + \" \" + last_name")
+step_compute_bonus = TransformStep("compute", params_compute_bonus)
+params_compute_bonus = TransformParams(null, null, null, "annual_bonus", "performance_rating >= 4.5 ? salary * 0.15 : performance_rating >= 3.5 ? salary * 0.10 : performance_rating >= 2.5 ? salary * 0.05 : 0")
+step_group_dept = TransformStep("aggregate", params_group_dept)
+params_group_dept = TransformParams("department", null, null, null, null, [metric_employee_count, metric_avg_salary, metric_total_bonus], null, null, null)
+metric_employee_count = Metric("employee_count", "count", null, null, null)
+metric_avg_salary = Metric("avg_salary", "avg", "salary", null, 0)
+metric_total_bonus = Metric("total_bonus", "sum", "annual_bonus", null, 0)
+step_sort_totalbonus = TransformStep("sort", params_sort_totalbonus)
+params_sort_totalbonus = TransformParams(null, null, null, null, null, null, "total_bonus", "desc")
+data_rows = [
+{"employee_id":"E001","first_name":"Alice","last_name":"Chen","department":"Engineering","hire_date":"2022-03-15","salary":125000,"status":"active","performance_rating":4.7},
+{"employee_id":"E002","first_name":"Bob","last_name":"Martinez","department":"Engineering","hire_date":"2023-06-01","salary":115000,"status":"active","performance_rating":3.8},
+{"employee_id":"E003","first_name":"Carol","last_name":"Johnson","department":"Engineering","hire_date":"2024-05-20","salary":105000,"status":"active","performance_rating":4.2},
+{"employee_id":"E004","first_name":"David","last_name":"Kim","department":"Sales","hire_date":"2021-01-10","salary":95000,"status":"active","performance_rating":4.6},
+{"employee_id":"E005","first_name":"Eva","last_name":"Patel","department":"Sales","hire_date":"2023-08-22","salary":88000,"status":"active","performance_rating":2.3},
+{"employee_id":"E006","first_name":"Frank","last_name":"O'Brien","department":"Sales","hire_date":"2022-11-03","salary":92000,"status":"inactive","performance_rating":4.1},
+{"employee_id":"E007","first_name":"Grace","last_name":"Liu","department":"Marketing","hire_date":"2020-07-14","salary":98000,"status":"active","performance_rating":3.2},
+{"employee_id":"E008","first_name":"Hector","last_name":"Ruiz","department":"Marketing","hire_date":"2023-02-28","salary":91000,"status":"active","performance_rating":4.8},
+{"employee_id":"E009","first_name":"Irene","last_name":"Novak","department":"Finance","hire_date":"2019-12-01","salary":110000,"status":"active","performance_rating":3.9},
+{"employee_id":"E010","first_name":"James","last_name":"Wright","department":"Finance","hire_date":"2023-09-15","salary":102000,"status":"active","performance_rating":4.5},
+{"employee_id":"E011","first_name":"Karen","last_name":"Bell","department":"Finance","hire_date":"2021-06-30","salary":108000,"status":"active","performance_rating":2.8},
+{"employee_id":"E012","first_name":"Leo","last_name":"Santos","department":"Engineering","hire_date":"2022-08-17","salary":120000,"status":"active","performance_rating":3.6}
+]

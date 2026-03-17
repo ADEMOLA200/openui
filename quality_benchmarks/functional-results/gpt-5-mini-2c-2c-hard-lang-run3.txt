@@ -1,0 +1,67 @@
+root = HardStateMachine("ci_cd_pipeline", "idle", ["prod_validated", "pipeline_aborted", "rollback_complete"], ["idle","source_checkout","checkout_failed","build_started","unit_tests","lint","unit_tests_passed","unit_tests_failed","lint_passed","lint_failed","build_complete","build_failed","integration_tests","integration_passed","integration_failed","staging_deploy","staging_deployed","staging_deploy_failed","staging_validation","staging_validated","staging_validation_failed","approval_pending","approval_granted","approval_rejected","prod_deploy","prod_deployed","prod_deploy_failed","prod_validation","prod_validated","prod_validation_failed","rollback_initiated","rollback_complete","pipeline_aborted"], [t_idle_trigger_pipeline,t_source_checkout_checkout_success,t_source_checkout_checkout_error,t_checkout_failed_retry,t_build_started_fork_unit_tests,t_build_started_fork_lint,t_unit_tests_passed,t_unit_tests_failed,t_lint_passed,t_lint_failed,t_build_complete_to_integration,t_build_failed_reset,t_integration_passed,t_integration_failed,t_integration_failed_retry,t_integration_passed_deploy_staging,t_staging_deploy_success,t_staging_deploy_error,t_staging_deploy_failed_retry,t_staging_deployed_validate,t_staging_validation_pass,t_staging_validation_fail,t_staging_validation_failed_redeploy,t_staging_validated_request_approval,t_approval_pending_grant,t_approval_pending_reject,t_approval_rejected_reset,t_approval_granted_deploy_prod,t_prod_deploy_success,t_prod_deploy_error,t_prod_deploy_failed_initiate_rollback,t_prod_deployed_validate,t_prod_validation_pass,t_prod_validation_fail,t_prod_validation_failed_initiate_rollback,t_rollback_success,t_rollback_complete_reset,t_abort_source_checkout,t_abort_build_started,t_abort_unit_tests,t_abort_lint,t_abort_integration_tests,t_abort_staging_deploy,t_abort_staging_validation,t_abort_approval_pending,t_abort_prod_deploy], [join_build_complete])
+
+t_idle_trigger_pipeline = Transition("idle","source_checkout","trigger_pipeline","branch != \"\"","action_start_pipeline")
+
+t_source_checkout_checkout_success = Transition("source_checkout","build_started","checkout_success",null,"action_log_checkout_success")
+t_source_checkout_checkout_error = Transition("source_checkout","checkout_failed","checkout_error",null,"action_log_checkout_error")
+
+t_checkout_failed_retry = Transition("checkout_failed","source_checkout","retry","retry_count < 2","action_increment_retry")
+
+t_build_started_fork_unit_tests = ForkTransition("build_started",["unit_tests"],"start_parallel_build","action_fork_start_unit_tests")
+t_build_started_fork_lint = ForkTransition("build_started",["lint"],"start_parallel_build","action_fork_start_lint")
+
+t_unit_tests_passed = Transition("unit_tests","unit_tests_passed","tests_pass",null,"action_record_unit_tests_pass")
+t_unit_tests_failed = Transition("unit_tests","unit_tests_failed","tests_fail",null,"action_record_unit_tests_fail")
+
+t_lint_passed = Transition("lint","lint_passed","lint_pass",null,"action_record_lint_pass")
+t_lint_failed = Transition("lint","lint_failed","lint_fail",null,"action_record_lint_fail")
+
+join_build_complete = JoinCondition("build_complete",["unit_tests_passed","lint_passed"],"build_failed",["unit_tests_failed","lint_failed"])
+
+t_build_complete_to_integration = Transition("build_complete","integration_tests","start_integration",null,"action_start_integration")
+t_build_failed_reset = Transition("build_failed","idle","reset_pipeline",null,"action_reset_pipeline")
+
+t_integration_passed = Transition("integration_tests","integration_passed","integration_pass",null,"action_record_integration_pass")
+t_integration_failed = Transition("integration_tests","integration_failed","integration_fail",null,"action_record_integration_fail")
+t_integration_failed_retry = Transition("integration_failed","integration_tests","retry","retry_count < 2","action_increment_retry_integration")
+
+t_integration_passed_deploy_staging = Transition("integration_passed","staging_deploy","deploy_staging",null,"action_start_staging_deploy")
+
+t_staging_deploy_success = Transition("staging_deploy","staging_deployed","staging_deploy_success",null,"action_record_staging_deploy_success")
+t_staging_deploy_error = Transition("staging_deploy","staging_deploy_failed","staging_deploy_error",null,"action_record_staging_deploy_error")
+t_staging_deploy_failed_retry = Transition("staging_deploy_failed","staging_deploy","retry","retry_count < 2","action_increment_retry_staging")
+
+t_staging_deployed_validate = Transition("staging_deployed","staging_validation","validate_staging",null,"action_start_staging_validation")
+t_staging_validation_pass = Transition("staging_validation","staging_validated","staging_checks_pass",null,"action_record_staging_checks_pass")
+t_staging_validation_fail = Transition("staging_validation","staging_validation_failed","staging_checks_fail",null,"action_record_staging_checks_fail")
+t_staging_validation_failed_redeploy = Transition("staging_validation_failed","staging_deploy","redeploy_staging",null,"action_redeploy_staging")
+
+t_staging_validated_request_approval = Transition("staging_validated","approval_pending","request_approval",null,"action_notify_approvers")
+
+t_approval_pending_grant = Transition("approval_pending","approval_granted","approve","approver_role == \"lead\" || approver_role == \"admin\"","action_record_approval")
+t_approval_pending_reject = Transition("approval_pending","approval_rejected","reject",null,"action_record_rejection")
+t_approval_rejected_reset = Transition("approval_rejected","idle","reset_pipeline",null,"action_reset_pipeline")
+
+t_approval_granted_deploy_prod = Transition("approval_granted","prod_deploy","deploy_production",null,"action_start_prod_deploy")
+
+t_prod_deploy_success = Transition("prod_deploy","prod_deployed","prod_deploy_success",null,"action_record_prod_deploy_success")
+t_prod_deploy_error = Transition("prod_deploy","prod_deploy_failed","prod_deploy_error",null,"action_record_prod_deploy_error")
+t_prod_deploy_failed_initiate_rollback = Transition("prod_deploy_failed","rollback_initiated","initiate_rollback",null,"action_start_rollback")
+
+t_prod_deployed_validate = Transition("prod_deployed","prod_validation","validate_production",null,"action_start_prod_validation")
+t_prod_validation_pass = Transition("prod_validation","prod_validated","prod_checks_pass",null,"action_record_prod_checks_pass")
+t_prod_validation_fail = Transition("prod_validation","prod_validation_failed","prod_checks_fail",null,"action_record_prod_checks_fail")
+t_prod_validation_failed_initiate_rollback = Transition("prod_validation_failed","rollback_initiated","initiate_rollback",null,"action_start_rollback")
+
+t_rollback_success = Transition("rollback_initiated","rollback_complete","rollback_success",null,"action_record_rollback_success")
+t_rollback_complete_reset = Transition("rollback_complete","idle","reset_pipeline",null,"action_reset_pipeline")
+
+t_abort_source_checkout = Transition("source_checkout","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_build_started = Transition("build_started","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_unit_tests = Transition("unit_tests","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_lint = Transition("lint","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_integration_tests = Transition("integration_tests","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_staging_deploy = Transition("staging_deploy","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_staging_validation = Transition("staging_validation","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_approval_pending = Transition("approval_pending","pipeline_aborted","abort",null,"action_abort_pipeline")
+t_abort_prod_deploy = Transition("prod_deploy","pipeline_aborted","abort",null,"action_abort_pipeline")

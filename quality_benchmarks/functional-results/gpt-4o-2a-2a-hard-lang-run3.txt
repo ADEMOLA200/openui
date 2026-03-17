@@ -1,0 +1,74 @@
+```
+root = Pipeline(steps, outputColumns)
+
+steps = [
+    joinStep,
+    filterDateStep,
+    filterChannelStep,
+    computeRevenueStep,
+    computeCostStep,
+    computeProfitStep,
+    computeMarginStep,
+    firstAggregationStep,
+    filterOrderCountStep,
+    secondAggregationStep,
+    sortStep
+]
+
+joinStep = TransformStep("join", joinParams)
+joinParams = TransformParams(null, null, null, null, null, null, null, null, null, null, "product_id")
+
+filterDateStep = TransformStep("filter", filterDateParams)
+filterDateParams = TransformParams("order_date", "after", "2025-06-30")
+
+filterChannelStep = TransformStep("filter", filterChannelParams)
+filterChannelParams = TransformParams("channel", "neq", "internal")
+
+computeRevenueStep = TransformStep("compute", computeRevenueParams)
+computeRevenueParams = TransformParams(null, null, null, "revenue", "quantity * unit_price * (1 - discount_percent / 100)")
+
+computeCostStep = TransformStep("compute", computeCostParams)
+computeCostParams = TransformParams(null, null, null, "cost", "quantity * unit_cost")
+
+computeProfitStep = TransformStep("compute", computeProfitParams)
+computeProfitParams = TransformParams(null, null, null, "profit", "revenue - cost")
+
+computeMarginStep = TransformStep("compute", computeMarginParams)
+computeMarginParams = TransformParams(null, null, null, "margin_percent", "(profit / revenue) * 100")
+
+firstAggregationStep = TransformStep("aggregate", firstAggregationParams)
+firstAggregationParams = TransformParams(null, null, null, null, null, firstAggregationConditions)
+
+firstAggregationConditions = [
+    Metric("order_count", "count"),
+    Metric("total_revenue", "sum", "revenue", null, 2),
+    Metric("total_profit", "sum", "profit", null, 2),
+    Metric("avg_margin", "avg", "margin_percent", null, 1)
+]
+
+filterOrderCountStep = TransformStep("filter", filterOrderCountParams)
+filterOrderCountParams = TransformParams("order_count", "gte", 2)
+
+secondAggregationStep = TransformStep("aggregate", secondAggregationParams)
+secondAggregationParams = TransformParams(null, null, null, null, null, secondAggregationConditions)
+
+secondAggregationConditions = [
+    Metric("regions_active", "count_distinct", "region"),
+    Metric("combined_revenue", "sum", "total_revenue", null, 2),
+    Metric("combined_profit", "sum", "total_profit", null, 2),
+    Metric("best_region", "argmax", "region", "total_revenue"),
+    Metric("best_region_revenue", "argmax", "total_revenue", null, 2)
+]
+
+sortStep = TransformStep("sort", sortParams)
+sortParams = TransformParams(null, null, null, null, null, null, null, null, null, "combined_profit", "desc")
+
+outputColumns = [
+    "category",
+    "regions_active",
+    "combined_revenue",
+    "combined_profit",
+    "best_region",
+    "best_region_revenue"
+]
+```

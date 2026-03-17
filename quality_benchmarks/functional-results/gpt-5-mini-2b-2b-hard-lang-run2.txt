@@ -1,0 +1,26 @@
+root = Workflow([fetch_projects, filter_active_projects, for_each_active_project, gather_unique_contributors_rates, classify_projects, fetch_contacts_for_flagged, generate_report, send_slack_notification], WorkflowOutput("{{report_id: steps.generate_report.response.report_id, report_url: steps.generate_report.response.url, flagged_project_count: steps.generate_report.output_flagged_count, flagged_projects: steps.generate_report.output_flagged_projects}}"))
+
+fetch_projects = ApiCall("fetch_projects", "GET", "/api/projects", null, null, null, null, null, "$.projects")
+
+filter_active_projects = ApiCall("filter_active_projects", "GET", "/api/projects", null, null, "fetch_projects", null, "true", "$.projects[?(@.status==\"active\")]")
+
+for_each_active_project = ApiCall("for_each_active_project", "GET", "/api/projects/{id}/time-entries", null, null, ["filter_active_projects"], "filter_active_projects", null, "$.entries")
+project_teams_fetch = ApiCall("project_teams_fetch", "GET", "/api/teams/{id}", null, null, ["for_each_active_project"], null, null, "$")
+project_risks_fetch = ApiCall("project_risks_fetch", "GET", "/api/projects/{id}/risks", null, null, ["for_each_active_project"], null, null, "$.risks")
+
+gather_unique_contributors_rates = ApiCall("gather_unique_contributors_rates", "GET", "/api/users/{id}", null, null, ["for_each_active_project"], "for_each_active_project", null, "$")
+project_time_entries_fetch = ApiCall("project_time_entries_fetch", "GET", "/api/projects/{id}/time-entries", [{"start_date":"2025-10-01","end_date":"2025-12-31"}], null, ["filter_active_projects"], "filter_active_projects", null, "$.entries")
+
+classify_projects = ApiCall("classify_projects", "GET", "/api/users/{id}", null, null, ["gather_unique_contributors_rates","project_risks_fetch","project_time_entries_fetch","project_teams_fetch"], null, null, "$")
+
+fetch_contacts_for_flagged = ApiCall("fetch_contacts_for_flagged", "GET", "/api/users/{id}", null, null, ["classify_projects"], null, null, "$")
+
+report_body = {
+  "title": "Q4 2025 Project Health Report",
+  "sections": null,
+  "recipients": null
+}
+
+generate_report = ApiCall("generate_report", "POST", "/api/reports/generate", null, report_body, ["fetch_contacts_for_flagged"], null, null, "$")
+
+send_slack_notification = ApiCall("send_slack_notification", "POST", "/api/notifications/slack", null, {"channel":"#project-health","message":"Q4 Project Health Report generated: {{steps.generate_report.response.url}}. {{steps.generate_report.output_flagged_count}} projects flagged."}, ["generate_report"], null, null, "$")

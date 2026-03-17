@@ -1,0 +1,72 @@
+{
+  "steps": [
+    {
+      "id": "fetch_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "extract": "$.users"
+    },
+    {
+      "id": "filter_active_users",
+      "method": "GET",
+      "endpoint": "/api/users", 
+      "dependsOn": [
+        "fetch_users"
+      ],
+      "condition": "$.fetch_users.users != null",
+      "extract": "$.fetch_users.users[?(@.active==true)]"
+    },
+    {
+      "id": "for_each_active_user_get_purchases",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}/purchases",
+      "forEach": "$.filter_active_users",
+      "queryParams": {
+        "since": "2025-01-01",
+        "min_amount": "500"
+      },
+      "dependsOn": [
+        "filter_active_users"
+      ],
+      "extract": "$.purchases"
+    },
+    {
+      "id": "identify_qualifying_users",
+      "method": "GET",
+      "endpoint": "/api/users",
+      "dependsOn": [
+        "for_each_active_user_get_purchases"
+      ],
+      "condition": "true",
+      "extract": "$.for_each_active_user_get_purchases[?(@.length>=3)]"
+    },
+    {
+      "id": "fetch_department_for_qualifying_user",
+      "method": "GET",
+      "endpoint": "/api/departments/{department_id}",
+      "forEach": "$.identify_qualifying_users",
+      "dependsOn": [
+        "identify_qualifying_users"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "send_email_to_qualifying_user",
+      "method": "POST",
+      "endpoint": "/api/notifications/email",
+      "forEach": "$.identify_qualifying_users",
+      "dependsOn": [
+        "fetch_department_for_qualifying_user"
+      ],
+      "body": {
+        "to": "{user.email}",
+        "subject": "Loyalty Reward — {department.name}",
+        "body": "Hi {user.name}, you have made {purchase_count} qualifying purchases. You are eligible for our loyalty program."
+      },
+      "extract": "$"
+    }
+  ],
+  "output": {
+    "format": "[ for each item in $.identify_qualifying_users -> { \"user_name\": {item.name}, \"email\": {item.email}, \"department_name\": {corresponding department.name from fetch_department_for_qualifying_user where id==item.department_id}, \"purchase_count\": {length of purchases from for_each_active_user_get_purchases for this user}, \"notification_id\": {corresponding notification_id from send_email_to_qualifying_user for this user} } ]"
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "steps": [
+    {
+      "id": "s1_fetch_projects",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "extract": "$.projects"
+    },
+    {
+      "id": "s2_filter_active",
+      "method": "GET",
+      "endpoint": "/api/projects",
+      "dependsOn": [
+        "s1_fetch_projects"
+      ],
+      "condition": "$.projects != null",
+      "extract": "$.projects[?(@.status=='active')]"
+    },
+    {
+      "id": "s3_for_each_active_project",
+      "id": "s3_for_each_active_project",
+      "method": "GET",
+      "endpoint": "/api/projects/{project_id}",
+      "forEach": "s2_filter_active[?(@)]",
+      "dependsOn": [
+        "s2_filter_active"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "s4_fetch_project_teams",
+      "method": "GET",
+      "endpoint": "/api/teams/{team_id}",
+      "forEach": "s2_filter_active[*].team_ids",
+      "dependsOn": [
+        "s2_filter_active"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "s5_fetch_time_entries",
+      "method": "GET",
+      "endpoint": "/api/projects/{id}/time-entries",
+      "queryParams": {
+        "start_date": "2025-10-01",
+        "end_date": "2025-12-31"
+      },
+      "forEach": "s2_filter_active[*].id",
+      "dependsOn": [
+        "s2_filter_active"
+      ],
+      "extract": "$.entries"
+    },
+    {
+      "id": "s6_fetch_project_risks",
+      "method": "GET",
+      "endpoint": "/api/projects/{id}/risks",
+      "forEach": "s2_filter_active[*].id",
+      "dependsOn": [
+        "s2_filter_active"
+      ],
+      "extract": "$.risks"
+    },
+    {
+      "id": "s7_aggregate_metrics",
+      "method": "GET",
+      "endpoint": "/internal/compute-metrics",
+      "dependsOn": [
+        "s2_filter_active",
+        "s4_fetch_project_teams",
+        "s5_fetch_time_entries",
+        "s6_fetch_project_risks"
+      ],
+      "extract": "$.project_metrics"
+    },
+    {
+      "id": "s8_fetch_contributor_rates",
+      "method": "GET",
+      "endpoint": "/api/users/{user_id}",
+      "forEach": "s7_aggregate_metrics[*].unique_contributors_list",
+      "dependsOn": [
+        "s7_aggregate_metrics"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "s9_compute_budget_consumption",
+      "method": "GET",
+      "endpoint": "/internal/compute-budget",
+      "dependsOn": [
+        "s7_aggregate_metrics",
+        "s8_fetch_contributor_rates"
+      ],
+      "extract": "$.budget_consumed_percent_list"
+    },
+    {
+      "id": "s10_classify_projects",
+      "method": "GET",
+      "endpoint": "/internal/classify-projects",
+      "dependsOn": [
+        "s7_aggregate_metrics",
+        "s9_compute_budget_consumption"
+      ],
+      "extract": "$.classified_projects"
+    },
+    {
+      "id": "s11_fetch_owner_details",
+      "method": "GET",
+      "endpoint": "/api/users/{owner_id}",
+      "forEach": "s10_classify_projects[?(@.classification!='on-track')].owner_id",
+      "dependsOn": [
+        "s10_classify_projects"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "s12_fetch_team_leads",
+      "method": "GET",
+      "endpoint": "/api/users/{lead_id}",
+      "forEach": "s4_fetch_project_teams[*].lead_id",
+      "dependsOn": [
+        "s4_fetch_project_teams",
+        "s10_classify_projects"
+      ],
+      "extract": "$"
+    },
+    {
+      "id": "s13_prepare_report_sections",
+      "method": "POST",
+      "endpoint": "/internal/prepare-report-sections",
+      "dependsOn": [
+        "s10_classify_projects",
+        "s11_fetch_owner_details",
+        "s12_fetch_team_leads"
+      ],
+      "body": {
+        "title": "Q4 2025 Project Health Report",
+        "projects": "{{s10_classify_projects}}",
+        "owners": "{{s11_fetch_owner_details}}",
+        "team_leads": "{{s12_fetch_team_leads}}"
+      },
+      "extract": "$.sections"
+    },
+    {
+      "id": "s14_generate_report",
+      "method": "POST",
+      "endpoint": "/api/reports/generate",
+      "dependsOn": [
+        "s13_prepare_report_sections"
+      ],
+      "body": {
+        "title": "Q4 2025 Project Health Report",
+        "sections": "{{s13_prepare_report_sections}}",
+        "recipients": "{{s11_fetch_owner_details[*].email + s12_fetch_team_leads[*].email | unique}}"
+      },
+      "extract": "$"
+    },
+    {
+      "id": "s15_send_slack_notification",
+      "method": "POST",
+      "endpoint": "/api/notifications/slack",
+      "dependsOn": [
+        "s14_generate_report",
+        "s10_classify_projects"
+      ],
+      "body": {
+        "channel": "#project-health",
+        "message": "Q4 Project Health Report generated: {{s14_generate_report.url}}. {{s10_classify_projects[?(@.classification!='on-track')].length}} projects flagged."
+      },
+      "extract": "$"
+    },
+    {
+      "id": "s16_output_summary",
+      "method": "GET",
+      "endpoint": "/internal/final-output",
+      "dependsOn": [
+        "s14_generate_report",
+        "s10_classify_projects",
+        "s11_fetch_owner_details",
+        "s12_fetch_team_leads"
+      ],
+      "extract": "$"
+    }
+  ],
+  "output": {
+    "format": "{ \"report_id\": \"{{s14_generate_report.report_id}}\", \"report_url\": \"{{s14_generate_report.url}}\", \"flagged_project_count\": {{s10_classify_projects[?(@.classification!='on-track')].length}}, \"flagged_projects\": {{s10_classify_projects[?(@.classification!='on-track')].map(p => ({ project_name: p.name, classification: p.classification, owner_name: (s11_fetch_owner_details[?(@.id==p.owner_id)][0].name), utilization_percent: p.utilization_percent, budget_consumed_percent: p.budget_consumed_percent, open_high_risks: p.open_high_risks }))}} }"
+  }
+}

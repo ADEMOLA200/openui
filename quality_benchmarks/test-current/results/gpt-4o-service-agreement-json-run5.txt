@@ -1,0 +1,89 @@
+{
+  "agreementNumber": "SA-2026-03-1184",
+  "effectiveDate": "2026-02-01",
+  "executionDate": "2026-01-08",
+  "endDate": "2028-01-31",
+  "termMonths": 24,
+  "provider": {
+    "name": "Castellan Consulting Group, LLC",
+    "entityType": "llc",
+    "stateOfIncorporation": "Delaware",
+    "address": {
+      "street": "900 Market Street",
+      "floor": "Floor 6",
+      "city": "Wilmington",
+      "state": "DE",
+      "zipCode": "19801"
+    },
+    "representative": {
+      "name": "Victor Haines",
+      "title": "Managing Partner"
+    }
+  },
+  "client": {
+    "name": "Foxworth Industrial Supply, Inc.",
+    "entityType": "corporation",
+    "stateOfIncorporation": "Pennsylvania",
+    "address": {
+      "street": "3420 Liberty Avenue",
+      "city": "Pittsburgh",
+      "state": "PA",
+      "zipCode": "15201"
+    },
+    "representative": {
+      "name": "Andrea Marsh",
+      "title": "Chief Operating Officer"
+    }
+  },
+  "termination": {
+    "noticePeriodDays": 90,
+    "forCauseNoticeDays": 30,
+    "earlyTerminationFeeMonths": 3
+  },
+  "phases": [
+    {
+      "number": 1,
+      "name": "Operational Assessment",
+      "startDate": "2026-02-01",
+      "endDate": "2026-04-30",
+      "feeType": "fixed",
+      "feeAmount": 85,
+      "feeCap": null
+    },
+    {
+      "number": 2,
+      "name": "Process Redesign",
+      "startDate": "2026-05-01",
+      "endDate": "2026-08-31",
+      "feeType": "fixed",
+      "feeAmount": 120,
+      "feeCap": null
+    },
+    {
+      "number": 3,
+      "name": "Implementation Support",
+      "startDate": "2026-09-01",
+      "endDate": "2027-01-31",
+      "feeType": "hourly",
+      "feeAmount": 295,
+      "feeCap": 175
+    }
+  ],
+  "monthlyRetainer": 8.5,
+  "paymentTerms": {
+    "netDays": 45,
+    "lateInterestMonthlyPercent": 1.5
+  },
+  "insurance": {
+    "perOccurrence": 2000000,
+    "aggregate": 5000000
+  },
+  "liabilityCap": 500000,
+  "governingLaw": "Delaware",
+  "disputeResolution": {
+    "method": "arbitration",
+    "administrator": "American Arbitration Association",
+    "venue": "Wilmington, Delaware",
+    "attorneyFeesRecoverable": true
+  }
+}

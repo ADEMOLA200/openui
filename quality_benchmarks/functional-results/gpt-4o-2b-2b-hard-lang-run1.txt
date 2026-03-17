@@ -1,0 +1,38 @@
+```
+root = Workflow(steps, output)
+
+steps = [
+  fetchProjects,
+  filterActiveProjects,
+  fetchTeamsForProjects,
+  fetchTimeEntriesForProjects,
+  fetchRisksForProjects,
+  computeProjectMetrics,
+  classifyProjects,
+  fetchOwnerAndLeads,
+  generateReport,
+  sendSlackNotification
+]
+
+fetchProjects = ApiCall("fetchProjects", "GET", "/api/projects", null, null, null, null, "$.projects")
+
+filterActiveProjects = ApiCall("filterActiveProjects", "GET", "/api/projects", null, null, ["fetchProjects"], null, "$[?(@.status=='active')]")
+
+fetchTeamsForProjects = ApiCall("fetchTeamsForProjects", "GET", "/api/teams/{id}", null, null, ["filterActiveProjects"], "$.team_ids", null)
+
+fetchTimeEntriesForProjects = ApiCall("fetchTimeEntriesForProjects", "GET", "/api/projects/{id}/time-entries", {"start_date": "2025-10-01", "end_date": "2025-12-31"}, null, ["filterActiveProjects"], null, null)
+
+fetchRisksForProjects = ApiCall("fetchRisksForProjects", "GET", "/api/projects/{id}/risks", null, null, ["filterActiveProjects"], null, null)
+
+computeProjectMetrics = ApiCall("computeProjectMetrics", "GET", "/api/projects", null, null, ["fetchTimeEntriesForProjects", "fetchRisksForProjects"], null, null)
+
+classifyProjects = ApiCall("classifyProjects", "GET", "/api/projects", null, null, ["computeProjectMetrics"], null, null)
+
+fetchOwnerAndLeads = ApiCall("fetchOwnerAndLeads", "GET", "/api/users/{id}", null, null, ["classifyProjects"], null, null)
+
+generateReport = ApiCall("generateReport", "POST", "/api/reports/generate", null, {"title": "Q4 2025 Project Health Report", "sections": [{"heading": "Project Health", "content": "Details"}], "recipients": []}, ["fetchOwnerAndLeads"], null, "$.report_id")
+
+sendSlackNotification = ApiCall("sendSlackNotification", "POST", "/api/notifications/slack", null, {"channel": "#project-health", "message": "Q4 Project Health Report generated: {report_url}. {count} projects flagged."}, ["generateReport"], null, null)
+
+output = WorkflowOutput("{\"report_id\": \"{generateReport.report_id}\", \"report_url\": \"{generateReport.url}\", \"flagged_project_count\": \"{classifyProjects.flagged_count}\", \"flagged_projects\": \"{classifyProjects.flagged_projects}\"}")
+```

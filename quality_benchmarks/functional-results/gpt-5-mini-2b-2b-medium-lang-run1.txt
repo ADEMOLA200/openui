@@ -1,0 +1,37 @@
+root = Workflow([fetch_users, filter_active_users, for_each_active_user, collect_qualifying_users, fetch_depts_for_qualifiers, send_notifications, assemble_summary], WorkflowOutput("summary"))
+
+fetch_users = ApiCall("fetch_users", "GET", "/api/users", null, null, null, null, null, "$.users")
+
+filter_active_users = ApiCall("filter_active_users", "GET", "/api/users", null, null, "fetch_users", null, "$.users[?(@.active==true)]")
+
+for_each_active_user = ApiCall("for_each_active_user", "GET", "/api/users/{id}/purchases", null, null, "filter_active_users", "$.users", "true", "$.purchases")
+ 
+collect_qualifying_users = ApiCall("collect_qualifying_users", "GET", "/api/users", null, null, "for_each_active_user", null, null)
+
+fetch_depts_for_qualifiers = ApiCall("fetch_depts_for_qualifiers", "GET", "/api/departments/{id}", null, null, "collect_qualifying_users", null, null)
+
+send_notifications = ApiCall("send_notifications", "POST", "/api/notifications/email", null, null, "fetch_depts_for_qualifiers", null, null, null)
+
+assemble_summary = ApiCall("assemble_summary", "GET", "/api/users", null, null, "send_notifications", null, null, null)
+
+users_list = ApiCall("users_list", "GET", "/api/users", null, null, null, null, null, "$.users")
+
+active_users = ApiCall("active_users", "GET", "/api/users", null, null, "users_list", null, null, "$.users[?(@.active==true)]")
+
+purchases_for_user = ApiCall("purchases_for_user", "GET", "/api/users/{id}/purchases", [{"since":"2025-01-01","min_amount":500}], null, "active_users", null, null, "$.purchases[?(@.amount>=500 && @.date>='2025-01-01')]")
+
+qualifier_detector = ApiCall("qualifier_detector", "GET", "/api/users", null, null, "purchases_for_user", null, null, "$.users[?(@.purchases.length>=3)]")
+
+dept_fetch = ApiCall("dept_fetch", "GET", "/api/departments/{id}", null, null, "qualifier_detector", null, null, "$")
+
+notify_sender = ApiCall("notify_sender", "POST", "/api/notifications/email", null, {"to":"{user.email}","subject":"Loyalty Reward — {department.name}","body":"Hi {user.name}, you have made {purchase_count} qualifying purchases. You are eligible for our loyalty program."}, "dept_fetch", null, null, "$")
+
+summary_builder = ApiCall("summary_builder", "GET", "/api/users", null, null, "notify_sender", null, null, "$")
+
+final_users = users_list
+final_active = active_users
+final_purchases = purchases_for_user
+final_qualifiers = qualifier_detector
+final_departments = dept_fetch
+final_notifications = notify_sender
+final_summary = summary_builder
