@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  BuiltinActionType,
+  ACTION_STEPS,
   defineComponent,
   useFormName,
   useFormValidation,
   useIsStreaming,
   useTriggerAction,
 } from "@openuidev/react-lang";
+import type { ActionPlan } from "@openuidev/react-lang";
 import { Button as OpenUIButton } from "../../components/Button";
 import { ButtonSchema } from "./schema";
 
@@ -38,33 +39,22 @@ export const Button = defineComponent({
         buttonType={props.type as "normal" | "destructive"}
         disabled={isStreaming}
         onClick={() => {
-          const action = props.action as
-            | { type?: string; url?: string; context?: string; params?: Record<string, any> }
-            | undefined;
-          const actionType = action?.type ?? BuiltinActionType.ContinueConversation;
+          const action = props.action as ActionPlan | undefined;
 
-          // Only validate for primary buttons with continue_conversation action (form submit).
-          // Secondary/tertiary buttons (e.g. "Ask to customize") skip validation.
-          const variant = (props.variant as string) || "primary";
-          if (
-            formValidation &&
-            variant === "primary" &&
-            actionType === BuiltinActionType.ContinueConversation
-          ) {
-            const valid = formValidation.validateForm();
-            if (!valid) return;
+          // Validate form for primary buttons with mutation/ToLLM steps
+          if (action?.steps && formValidation) {
+            const variant = (props.variant as string) || "primary";
+            if (variant === "primary") {
+              const needsValidation = action.steps.some(
+                (s) =>
+                  s.type === ACTION_STEPS.ToLLM ||
+                  (s.type === ACTION_STEPS.Run && s.refType === "mutation"),
+              );
+              if (needsValidation && !formValidation.validateForm()) return;
+            }
           }
-          const actionParams =
-            actionType === BuiltinActionType.OpenUrl
-              ? { url: action?.url }
-              : {
-                  ...(action?.params ?? {}),
-                  ...(action?.context ? { context: action.context } : {}),
-                };
-          triggerAction(label, formName, {
-            type: actionType,
-            params: actionParams,
-          });
+
+          triggerAction(label, formName, action);
         }}
       >
         {label}

@@ -8,6 +8,8 @@ import { generatePrompt } from "./parser/prompt";
  * Runtime shape of a parsed sub-component element as seen by parent renderers.
  */
 export type SubComponentOf<P> = {
+  /** Source variable name. Undefined for inline components. */
+  statementId?: string;
   type: "element";
   typeName: string;
   props: P;
@@ -82,10 +84,19 @@ export interface ComponentGroup {
   notes?: string[];
 }
 
+/** Tool descriptor for prompt generation — simple string or rich object. */
+export type ToolDescriptor =
+  | string
+  | { name: string; description?: string; inputSchema?: Record<string, unknown> };
+
 export interface PromptOptions {
   preamble?: string;
   additionalRules?: string[];
   examples?: string[];
+  /** Available tools for Query() — string names or rich descriptors injected into the prompt. */
+  tools?: ToolDescriptor[];
+  /** Enable edit-mode instructions in the prompt. */
+  editMode?: boolean;
 }
 
 // ─── Library ──────────────────────────────────────────────────────────────────

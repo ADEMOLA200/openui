@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect } from "react";
 import type { Library } from "./library";
+import type { ActionPlan } from "./parser/types";
 
-/**
- * Shared context provided by <Renderer /> to all rendered components.
- */
+/** Shared context provided by <Renderer /> to all rendered components. */
+import type { EvaluationContext } from "./runtime/evaluator";
+import type { Store } from "./runtime/store";
+
 export interface OpenUIContextValue {
   /** The active component library (schema + renderers). */
   library: Library;
@@ -15,42 +17,29 @@ export interface OpenUIContextValue {
   renderNode: (value: unknown) => ReactNode;
 
   /**
-   * Trigger an action. Components call this to fire structured ActionEvents.
-   *
-   * @param userMessage  Human-readable label ("Submit Application")
-   * @param formName  Optional form name — if provided, form state for this form is included
-   * @param action  Optional custom action config { type, params }
+   * Trigger an action. If actionPlan is provided, runs its steps sequentially
+   * (halts on mutation failure). Otherwise fires ContinueConversation with the label.
    */
   triggerAction: (
     userMessage: string,
     formName?: string,
-    action?: { type?: string; params?: Record<string, any> },
-  ) => void;
+    actionPlan?: ActionPlan,
+  ) => void | Promise<void>;
 
   /** Whether the LLM is currently streaming content. */
   isStreaming: boolean;
 
-  /** Get a form field value. Returns undefined if not set. */
-  getFieldValue: (formName: string | undefined, name: string) => any;
+  /** Get a resolved field value. Local slots return the value; global slots resolve from Store. */
+  getFieldValue: (formName: string | undefined, name: string) => unknown;
 
-  /**
-   * Set a form field value.
-   *
-   * @param formName  The form's name prop
-   * @param componentType  The component type (e.g. "Input", "Select", "RadioGroup")
-   * @param name  The field's name prop
-   * @param value  The new value
-   * @param shouldTriggerSaveCallback  When true, persists the updated state via updateMessage.
-   *   Text inputs should pass `false` on change and `true` on blur.
-   *   Discrete inputs (Select, RadioGroup, etc.) should always pass `true`.
-   */
-  setFieldValue: (
-    formName: string | undefined,
-    componentType: string | undefined,
-    name: string,
-    value: any,
-    shouldTriggerSaveCallback?: boolean,
-  ) => void;
+  /** Set a field value. Routes to the correct canonical source (local slot or Store). */
+  setFieldValue: (formName: string | undefined, name: string, value: unknown) => void;
+
+  /** Reactive binding store for $variables and form-backed field slots. */
+  store?: Store;
+
+  /** AST evaluation context used by runtime expression evaluation. */
+  evaluationContext?: EvaluationContext;
 }
 
 export const OpenUIContext = createContext<OpenUIContextValue | null>(null);
@@ -112,7 +101,7 @@ export function useGetFieldValue() {
  * @example
  * ```tsx
  * const setFieldValue = useSetFieldValue();
- * <input onChange={(e) => setFieldValue("contactForm", "Input", "name", e.target.value)} />
+ * <input onChange={(e) => setFieldValue("contactForm", "name", e.target.value)} />
  * ```
  */
 export function useSetFieldValue() {
@@ -145,25 +134,21 @@ export function useFormName(): string | undefined {
  */
 export function useSetDefaultValue({
   formName,
-  componentType,
   name,
   existingValue,
   defaultValue,
-  shouldTriggerSaveCallback = false,
 }: {
   formName?: string;
-  componentType: string;
   name: string;
-  existingValue: any;
-  defaultValue: any;
-  shouldTriggerSaveCallback?: boolean;
+  existingValue: unknown;
+  defaultValue: unknown;
 }) {
   const setFieldValue = useSetFieldValue();
   const isStreaming = useIsStreaming();
 
   useEffect(() => {
     if (!isStreaming && existingValue === undefined && defaultValue !== undefined) {
-      setFieldValue(formName, componentType, name, defaultValue, shouldTriggerSaveCallback);
+      setFieldValue(formName, name, defaultValue);
     }
-  }, [existingValue, defaultValue, isStreaming]);
+  }, [defaultValue, existingValue, formName, isStreaming, name, setFieldValue]);
 }

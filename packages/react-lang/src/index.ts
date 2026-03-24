@@ -17,10 +17,14 @@ export type { RendererProps } from "./Renderer";
 
 // openui-lang action types
 export { BuiltinActionType } from "./parser/types";
-export type { ActionEvent, ElementNode, ParseResult } from "./parser/types";
+export { ACTION_STEPS } from "./parser/builtins";
+export type { ActionEvent, ActionPlan, ActionStep, ElementNode, ParseResult } from "./parser/types";
 
 // openui-lang parser (server-side use)
 export { createParser, createStreamingParser, type LibraryJSONSchema } from "./parser";
+
+// openui-lang edit/merge
+export { mergeStatements } from "./parser/merge";
 
 // openui-lang context hooks (for use inside component renderers)
 export {
@@ -33,6 +37,13 @@ export {
   useSetFieldValue,
   useTriggerAction,
 } from "./context";
+
+// Runtime — reactive bindings, store, evaluator, query manager, field binding
+export { createMcpTransport, reactive } from "./runtime";
+export type { McpConnection, StateField, Transport } from "./runtime";
+
+// Unified field state hook — component authors use this
+export { useStateField } from "./hooks/useStateField";
 
 // openui-lang form validation
 export {
