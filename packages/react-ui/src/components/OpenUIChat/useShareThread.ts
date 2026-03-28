@@ -1,38 +1,28 @@
-import type { Message } from "@openuidev/react-headless";
-import { useThread } from "@openuidev/react-headless";
-import { useCallback, useEffect } from "react";
-import { useShareMessages } from "./useShareMessages";
+import { useThread, useThreadList } from "@openuidev/react-headless";
+import { useCallback } from "react";
 
 /**
- * Hook for sharing entire conversation threads.
- * Auto-selects all messages and provides a function to generate a shareable link.
+ * Hook for sharing conversation threads by threadId.
+ * The consumer's backend looks up messages by threadId.
  *
  * @category Hooks
  */
 export const useShareThread = ({
   generateShareLink,
 }: {
-  generateShareLink: (messages: Message[]) => Promise<string>;
+  generateShareLink: (threadId: string) => Promise<string>;
 }) => {
-  const { isLoadingMessages, messages, isRunning } = useThread();
-
-  const { selectedMessages, updateSelectedMessages } = useShareMessages({
-    shareMode: true,
-  });
-
-  useEffect(() => {
-    if (!isLoadingMessages && messages.length > 0) {
-      updateSelectedMessages(messages, "replace");
-    }
-  }, [isLoadingMessages, messages, updateSelectedMessages]);
+  const { isRunning, isLoadingMessages, messages } = useThread();
+  const { selectedThreadId } = useThreadList();
 
   const getShareThreadLink = useCallback(async () => {
-    return generateShareLink(selectedMessages);
-  }, [generateShareLink, selectedMessages]);
+    if (!selectedThreadId) throw new Error("No thread selected");
+    return generateShareLink(selectedThreadId);
+  }, [generateShareLink, selectedThreadId]);
 
   return {
-    shouldDisableShareButton: isRunning || isLoadingMessages,
-    selectedMessages,
+    shouldDisableShareButton: isRunning || isLoadingMessages || !selectedThreadId,
+    hasMessages: messages.length > 0,
     getShareThreadLink,
   };
 };

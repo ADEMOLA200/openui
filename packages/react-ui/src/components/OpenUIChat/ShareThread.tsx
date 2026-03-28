@@ -1,4 +1,3 @@
-import type { Message } from "@openuidev/react-headless";
 import { Share2 } from "lucide-react";
 import React, { type ReactNode } from "react";
 import { useLayoutContext } from "../../context/LayoutContext";
@@ -14,8 +13,8 @@ import { useShareThread } from "./useShareThread";
  * @category Components
  */
 export interface ShareThreadProps {
-  /** Async function that receives the current messages and returns a shareable URL. */
-  generateShareLink: (messages: Message[]) => Promise<string>;
+  /** Async function that receives the threadId and returns a shareable URL. */
+  generateShareLink: (threadId: string) => Promise<string>;
   /** Title for the share modal. Defaults to `"Share chat"`. */
   modalTitle?: string;
   /** Custom trigger element. When omitted, a default share button is rendered. */
@@ -33,11 +32,11 @@ export const ShareThread = ({ generateShareLink, modalTitle, customTrigger }: Sh
   const isMobile = layout === "mobile";
   const { portalThemeClassName } = useTheme();
 
-  const { selectedMessages, getShareThreadLink, shouldDisableShareButton } = useShareThread({
+  const { hasMessages, getShareThreadLink, shouldDisableShareButton } = useShareThread({
     generateShareLink,
   });
 
-  if (selectedMessages.length === 0) return null;
+  if (!hasMessages) return null;
 
   return (
     <ShareThreadModal

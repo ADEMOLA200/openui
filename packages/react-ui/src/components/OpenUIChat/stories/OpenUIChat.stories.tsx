@@ -75,9 +75,9 @@ const LONG_STARTERS: ConversationStartersConfig = {
   ],
 };
 
-const mockGenerateShareLink = async (_messages: Message[]) => {
+const mockGenerateShareLink = async (threadId: string) => {
   await new Promise((r) => setTimeout(r, 1000));
-  return `https://example.com/shared/${crypto.randomUUID().slice(0, 8)}`;
+  return `https://example.com/shared/${threadId}`;
 };
 
 const mockProcessMessage = async ({ messages }: { messages: Message[] }) => {
