@@ -35,6 +35,7 @@ export const Input = defineComponent({
 
     return (
       <OpenUIInput
+        id={field.name}
         name={field.name}
         placeholder={(props.placeholder as string) || ""}
         type={(props.type as string) || "text"}

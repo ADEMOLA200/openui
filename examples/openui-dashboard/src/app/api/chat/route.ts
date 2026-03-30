@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
-import { generatePrompt, type McpToolSpec } from "@openuidev/react-lang/parser";
+import { generatePrompt, type McpToolSpec } from "@openuidev/lang-core";
 import { promptSpec } from "../../../prompt-config";
 import { tools as toolDefs } from "../../../tools";
 import { z } from "zod";

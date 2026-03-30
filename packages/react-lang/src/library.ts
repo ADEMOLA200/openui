@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import { z } from "zod";
-import type { ComponentGroup, ComponentPromptSpec, McpToolSpec, PromptSpec } from "./parser/prompt";
-import { generatePrompt } from "./parser/prompt";
-import type { LibraryJSONSchema } from "./parser/types";
+import type { ComponentGroup, ComponentPromptSpec, McpToolSpec, PromptSpec } from "@openuidev/lang-core";
+import { generatePrompt } from "@openuidev/lang-core";
+import type { LibraryJSONSchema } from "@openuidev/lang-core";
 import { isReactiveSchema } from "./runtime/reactive";
 
-// Re-export ComponentGroup from prompt.ts (canonical definition)
-export type { ComponentGroup } from "./parser/prompt";
+// Re-export ComponentGroup from lang-core (canonical definition)
+export type { ComponentGroup } from "@openuidev/lang-core";
 
 // ─── Sub-component type ──────────────────────────────────────────────────────
 

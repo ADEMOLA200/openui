@@ -13,8 +13,8 @@
  */
 
 import type { Library } from "../library";
-import { isASTNode } from "../parser/ast";
-import type { ElementNode } from "../parser/types";
+import { isASTNode } from "@openuidev/lang-core";
+import type { ElementNode } from "@openuidev/lang-core";
 import type { EvaluationContext } from "./evaluator";
 import { evaluate, isReactiveAssign } from "./evaluator";
 import { isReactiveSchema } from "./reactive";

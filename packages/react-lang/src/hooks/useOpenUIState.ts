@@ -1,12 +1,16 @@
+import {
+  BuiltinActionType,
+  createStreamingParser,
+  ACTION_STEPS,
+  type ActionEvent,
+  type ParseResult,
+} from "@openuidev/lang-core";
+import type { ActionPlan } from "@openuidev/lang-core";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import type { OpenUIPersistedState } from "../Renderer";
 import type { OpenUIContextValue } from "../context";
 import type { Library } from "../library";
-import { ACTION_STEPS } from "../parser/builtins";
-import { createStreamingParser } from "../parser/parser";
-import type { ActionEvent, ActionPlan, ParseResult } from "../parser/types";
-import { BuiltinActionType } from "../parser/types";
 import { evaluateElementProps, type EvalContext } from "../runtime/evaluate-tree";
 import type { EvaluationContext } from "../runtime/evaluator";
 import { evaluate } from "../runtime/evaluator";

@@ -3,9 +3,8 @@
 // Framework-agnostic. No React imports.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { ASTNode } from "../parser/ast";
-import { ACTION_NAMES, ACTION_STEPS, BUILTINS, LAZY_BUILTINS, toNumber } from "../parser/builtins";
-import type { ActionPlan, ActionStep } from "../parser/types";
+import type { ASTNode, ActionPlan, ActionStep } from "@openuidev/lang-core";
+import { ACTION_NAMES, ACTION_STEPS, BUILTINS, LAZY_BUILTINS, toNumber } from "@openuidev/lang-core";
 
 export interface EvaluationContext {
   /** Read $variable from the store */
