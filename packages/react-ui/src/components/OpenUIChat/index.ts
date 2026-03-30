@@ -4,6 +4,8 @@ export { FullScreen } from "./ComposedStandalone";
 export { GenUIUserMessage } from "./GenUIUserMessage";
 export { ShareThread } from "./ShareThread";
 export type { ShareThreadProps } from "./ShareThread";
+export { ShareThreadModal } from "./ShareThreadModal";
+export type { ShareThreadModalProps } from "./ShareThreadModal";
 export type {
   AssistantMessageComponent,
   ComposerComponent,
