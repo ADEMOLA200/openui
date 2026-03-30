@@ -75,7 +75,7 @@ export type ValidationErrorCode =
   | "excess-args";
 
 /**
- * Structured error from the parser (main-compatible format).
+ * Structured error from the parser.
  */
 export type OpenUIError = {
   type: "validation";

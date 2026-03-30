@@ -118,8 +118,6 @@ export function createLibrary<C = unknown>(input: LibraryDefinition<C>): Library
     root: input.root,
 
     prompt(options?: PromptOptions): string {
-      // Build a basic PromptSpec from the library. For rich Zod-introspected
-      // signatures, use the react-lang Library.prompt() which has full toSpec().
       const spec: PromptSpec = {
         root: input.root,
         components: {},
