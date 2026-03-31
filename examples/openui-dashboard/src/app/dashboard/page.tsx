@@ -461,6 +461,15 @@ export default function LLMTestPage() {
                   library={openuiLibrary}
                   isStreaming={isStreaming}
                   transport={transport}
+                  queryLoader={
+                    <div style={{
+                      position: "absolute", top: 0, left: 0, right: 0, height: "3px",
+                      background: "linear-gradient(90deg, transparent 0%, #3b82f6 50%, transparent 100%)",
+                      backgroundSize: "200% 100%",
+                      animation: "openui-loading-bar 1.5s ease-in-out infinite",
+                      zIndex: 10,
+                    }} />
+                  }
                   onAction={(event) => {
                     console.log("[action]", event);
                     if (event.type === "continue_conversation") {

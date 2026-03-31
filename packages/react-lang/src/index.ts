@@ -27,7 +27,7 @@ export type {
 } from "@openuidev/lang-core";
 
 // openui-lang parser (server-side use)
-export { createParser, createStreamingParser, type LibraryJSONSchema } from "@openuidev/lang-core";
+export { createParser, createStreamingParser } from "@openuidev/lang-core";
 
 // Standalone prompt generation (no Zod deps — usable on backend)
 export { generatePrompt } from "@openuidev/lang-core";

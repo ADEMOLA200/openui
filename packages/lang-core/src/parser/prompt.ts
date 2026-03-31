@@ -94,7 +94,7 @@ function defaultForSchema(schema: Record<string, unknown>): unknown {
 
 const PREAMBLE = `You are an AI assistant that responds using openui-lang, a declarative UI language. Your ENTIRE response must be valid openui-lang code — no markdown, no explanations, just openui-lang.`;
 
-function syntaxRules(rootName: string, hasBindings: boolean): string {
+function syntaxRules(rootName: string, hasTools: boolean): string {
   const lines = [
     "## Syntax Rules",
     "",
@@ -107,7 +107,7 @@ function syntaxRules(rootName: string, hasBindings: boolean): string {
     "7. Optional arguments can be omitted from the end",
   ];
 
-  if (hasBindings) {
+  if (hasTools) {
     lines.push(
       "8. Declare mutable state with `$varName = defaultValue`. Components marked with `$binding` can read/write these. Undeclared $variables are auto-created with null default.",
       '9. String concatenation: `"text" + $var + "more"`',
@@ -119,16 +119,9 @@ function syntaxRules(rootName: string, hasBindings: boolean): string {
       "15. Ternary: `condition ? valueIfTrue : valueIfFalse`",
       "16. Parentheses for grouping: `(a + b) * c`",
     );
-  } else {
-    lines.push("8. No operators, no logic, no variables — only declarations");
   }
 
   lines.push("- Strings use double quotes with backslash escaping");
-  if (hasBindings) {
-    lines.push(
-      "- $variables store simple values (strings or numbers). Arithmetic on $variables does string concat. Use arithmetic on query result fields for math.",
-    );
-  }
 
   return lines.join("\n");
 }
@@ -150,8 +143,7 @@ ${lines}
 
 Builtins compose — output of one is input to the next:
 \`Count(Filter(data.rows, "field", "==", "val"))\` for KPIs/chart values, \`Round(Avg(data.rows.score), 1)\`, \`Each(data.rows, "item", Comp(item.field))\` for per-item rendering.
-Array pluck: \`data.rows.field\` extracts a field from every row → use with Sum, Avg, charts, tables.
-Do NOT use .map(), =>, or JavaScript.`;
+Array pluck: \`data.rows.field\` extracts a field from every row → use with Sum, Avg, charts, tables.`;
 }
 
 function querySection(): string {
@@ -191,21 +183,22 @@ result = Mutation("tool_name", {arg1: $binding, arg2: "value"})
 - Show loading state: \`result.status == "loading" ? TextContent("Saving...") : null\``;
 }
 
-function actionSection(): string {
-  return `## Action — Button Behavior (only used as Button's action prop)
+function actionSection(hasTools: boolean): string {
+  const steps = [
+    "- ToAssistant(\"message\") — Send a message to the assistant (for conversational buttons like \"Tell me more\", \"Explain this\")",
+    "- OpenUrl(\"https://...\") — Navigate to a URL",
+    "- Set($variable, value) — Set a $variable to a value (e.g. reset form fields)",
+  ];
 
-Action([steps...]) wires button clicks to operations. Steps execute in order. Halts if a mutation fails.
-Only use Action when a button needs to trigger a Mutation, re-fetch a Query, navigate, or reset form fields.
+  if (hasTools) {
+    steps.unshift(
+      "- Run(queryOrMutationRef) — Execute a Mutation or re-fetch a Query (ref must be a declared Query/Mutation)",
+    );
+  }
 
-Available steps:
-- Run(queryOrMutationRef) — Execute a Mutation or re-fetch a Query (ref must be a declared Query/Mutation)
-- Set($variable, value) — Set a $variable to a value. Use after mutations to reset form fields.
-- OpenUrl("https://...") — Navigate to a URL
-- ToAssistant("message") — Send a message to the assistant (ONLY for conversational buttons like "Tell me more", "Explain this"). This is NOT needed for form submits or mutations — use mutation status for feedback instead.
-
-Buttons without an explicit Action prop automatically send their label to the assistant (equivalent to Action([ToAssistant(label)])).
-
-Example — create + refresh + reset form (PREFERRED pattern for mutations):
+  const examples: string[] = [];
+  if (hasTools) {
+    examples.push(`Example — create + refresh + reset form (PREFERRED pattern for mutations):
 \`\`\`
 $priority = "medium"
 createResult = Mutation("create_ticket", {title: $title, priority: $priority})
@@ -213,16 +206,35 @@ tickets = Query("list_tickets", {}, {columns: [], results: []})
 onSubmit = Action([Run(createResult), Run(tickets), Set($title, ""), Set($priority, "medium")])
 submitBtn = Button("Create", onSubmit)
 statusMsg = createResult.status == "success" ? Callout("success", "Ticket created", "Your ticket was added.") : createResult.status == "error" ? Callout("danger", "Failed", createResult.error) : null
-\`\`\`
+\`\`\``);
+  }
 
-Example — simple nav:
+  examples.push(`Example — simple nav:
 \`\`\`
 viewBtn = Button("View", Action([OpenUrl("https://example.com")]))
-\`\`\`
+\`\`\``);
 
-- Action can be assigned to a variable or inlined: Button("Go", onSubmit) and Button("Go", Action([...])) both work
-- If a Run(mutation) step fails, remaining steps are skipped (halt on failure)
-- Run(queryRef) re-fetches the query (fire-and-forget, cannot fail)`;
+  const rules = [
+    "- Action can be assigned to a variable or inlined: Button(\"Go\", onSubmit) and Button(\"Go\", Action([...])) both work",
+  ];
+  if (hasTools) {
+    rules.push(
+      "- If a Run(mutation) step fails, remaining steps are skipped (halt on failure)",
+      "- Run(queryRef) re-fetches the query (fire-and-forget, cannot fail)",
+    );
+  }
+
+  return `## Action — Button Behavior
+
+Action([steps...]) wires button clicks to operations. Steps execute in order.
+Buttons without an explicit Action prop automatically send their label to the assistant (equivalent to Action([ToAssistant(label)])).
+
+Available steps:
+${steps.join("\n")}
+
+${examples.join("\n\n")}
+
+${rules.join("\n")}`;
 }
 
 function interactiveFiltersSection(): string {
@@ -316,20 +328,18 @@ function inlineModeSection(): string {
 
 You are in inline mode. You can respond in two ways:
 
-### 1. Code response (when the user wants to CREATE or CHANGE the dashboard)
+### 1. Code response (when the user wants to CREATE or CHANGE the UI)
 Wrap openui-lang code in triple-backtick fences. You can include explanatory text before/after:
 
-\`\`\`
 Here's your dashboard:
 
 \`\`\`openui-lang
-root = Stack([header, content])
-header = CardHeader("My Dashboard")
-content = TextContent("Hello world")
+root = RootComp([header, content])
+header = SomeHeader("Title")
+content = SomeContent("Hello world")
 \`\`\`
 
-I created a simple dashboard with a header.
-\`\`\`
+I created a simple layout with a header.
 
 ### 2. Text-only response (when the user asks a QUESTION)
 If the user asks "what is this?", "explain the chart", "how does this work", etc. — respond with plain text. Do NOT output any openui-lang code. The existing dashboard stays unchanged.
@@ -345,10 +355,11 @@ function toolWorkflowSection(): string {
 
 When tools are available, follow this workflow:
 1. FIRST: Call the most relevant tool to inspect the real data shape before generating code
-2. ALWAYS use Query() for data that should stay live — NEVER hardcode tool results as literal arrays
-3. Use the real data from step 1 as condensed Query defaults (3-5 rows) so the UI renders immediately
-4. Use builtins (Count, Filter, Sort, Sum) on Query results for KPIs and aggregations — the runtime evaluates these live on every refresh
-5. Hardcoded arrays are ONLY for static display data (labels, options) where no tool exists
+2. Use Query() for READ operations (data that should stay live) — NEVER hardcode tool results as literal arrays or objects
+3. Use Mutation() for WRITE operations (create, update, delete) — triggered by button clicks via Action([Run(mutationRef)])
+4. Use the real data from step 1 as condensed Query defaults (3-5 rows) so the UI renders immediately
+5. Use builtins (Count, Filter, Sort, Sum) on Query results for KPIs and aggregations — the runtime evaluates these live on every refresh
+6. Hardcoded arrays are ONLY for static display data (labels, options) where no tool exists
 
 WRONG — you called a tool and got data back, but you inlined the results:
 \`\`\`
@@ -360,48 +371,39 @@ chart = SomeChart(["A", "B"], [12, 8])
 \`\`\`
 This is static — it shows stale data and won't update. Creating item1, item2, item3... manually is ALWAYS wrong when a tool exists.
 
-RIGHT — use Query() for live data, builtins to derive values, Each() to render per item:
+RIGHT — use Query() for live data, Mutation() for writes, builtins to derive values:
 \`\`\`
 data = Query("tool_name", {}, {rows: []})
 openCount = Count(Filter(data.rows, "field", "==", "value"))
 list = Each(data.rows, "item", SomeComp(item.title, item.field))
-chart = SomeChart(["A", "B"], [Count(Filter(data.rows, "cat", "==", "A")), Count(Filter(data.rows, "cat", "==", "B"))])
+createResult = Mutation("create_tool", {title: $title})
+submitBtn = Button("Create", Action([Run(createResult), Run(data), Set($title, "")]))
 \`\`\`
 Everything derives from the Query — when data refreshes, the entire dashboard updates automatically.`;
 }
 
-function importantRules(rootName: string, inlineMode?: boolean): string {
-  const outputRule = inlineMode
-    ? "- When generating code, wrap it in \\`\\`\\`openui-lang fences. You may include explanatory text outside the fences."
-    : "- No trailing text or explanations — output ONLY openui-lang code";
-
-  const verifyRule = inlineMode
-    ? "6. If you included code, verify it's inside \\`\\`\\`openui-lang fences."
-    : "6. No markdown, prose, or comments — only openui-lang.";
+function importantRules(rootName: string, hasTools: boolean): string {
+  const verifyLines = [
+    `1. root = ${rootName}(...) is the FIRST line (for optimal streaming).`,
+    "2. Every referenced name is defined. Every defined name (other than root) is reachable from root.",
+  ];
+  if (hasTools) {
+    verifyLines.push(
+      "3. Every Query result is referenced by at least one component.",
+      "4. Every $binding appears in at least one component or expression.",
+    );
+  }
 
   return `## Important Rules
-${outputRule}
 - When asked about data, generate realistic/plausible data
 - Choose components that best represent the content (tables for comparisons, charts for trends, forms for input, etc.)
 
 ## Final Verification
 Before finishing, walk your output and verify:
-1. root = ${rootName}(...) is the FIRST line.
-2. Every referenced name is defined. Every defined name (other than root) is reachable from root.
-3. Every Query result is referenced by at least one component.
-4. Every $binding appears in at least one component or expression.
-${verifyRule}`;
+${verifyLines.join("\n")}`;
 }
 
 // ─── Tool rendering ─────────────────────────────────────────────────────────
-
-function isMutationTool(tool: McpToolSpec): boolean {
-  if (tool.annotations?.readOnlyHint === true) return false;
-  // Destructive hint is explicitly mutation
-  if (tool.annotations?.destructiveHint === true) return true;
-  // Name-based heuristic
-  return /^(create|update|delete|remove)/i.test(tool.name);
-}
 
 function renderToolSignature(tool: McpToolSpec): string {
   let args = "";
@@ -436,41 +438,29 @@ function renderToolsSection(tools: (string | McpToolSpec)[]): string {
   const lines: string[] = [];
 
   const stringTools: string[] = [];
-  const queryTools: McpToolSpec[] = [];
-  const mutationTools: McpToolSpec[] = [];
+  const specTools: McpToolSpec[] = [];
 
   for (const tool of tools) {
     if (typeof tool === "string") {
       stringTools.push(tool);
-    } else if (isMutationTool(tool)) {
-      mutationTools.push(tool);
     } else {
-      queryTools.push(tool);
+      specTools.push(tool);
     }
   }
 
-  if (queryTools.length > 0 || stringTools.length > 0) {
-    lines.push("## Available Query Tools");
-    lines.push("");
-    for (const t of stringTools) {
-      lines.push(`- ${t}`);
-    }
-    for (const t of queryTools) {
-      lines.push(renderToolSignature(t));
-    }
+  lines.push("## Available Tools");
+  lines.push("");
+  lines.push("Use these with Query() for read operations or Mutation() for write operations. The LLM decides which is appropriate based on the tool's purpose.");
+  lines.push("");
+  for (const t of stringTools) {
+    lines.push(`- ${t}`);
   }
-
-  if (mutationTools.length > 0) {
-    lines.push("");
-    lines.push("## Available Mutation Tools");
-    lines.push("");
-    for (const t of mutationTools) {
-      lines.push(renderToolSignature(t));
-    }
+  for (const t of specTools) {
+    lines.push(renderToolSignature(t));
   }
 
   // Default values hint for McpToolSpec tools with outputSchema
-  const toolsWithOutput = [...queryTools, ...mutationTools].filter((t) => t.outputSchema);
+  const toolsWithOutput = specTools.filter((t) => t.outputSchema);
   if (toolsWithOutput.length > 0) {
     lines.push("");
     lines.push("### Default values for Query results");
@@ -493,11 +483,16 @@ function renderToolsSection(tools: (string | McpToolSpec)[]): string {
 // ─── Component signatures ───────────────────────────────────────────────────
 
 function generateComponentSignatures(spec: PromptSpec): string {
+  const hasTools = !!spec.tools?.length;
+  const actionHint = hasTools
+    ? "Props typed `ActionExpression` accept an Action([steps...]) expression. See the Action section for available steps (Run, ToAssistant, OpenUrl, Set)."
+    : "Props typed `ActionExpression` accept an Action([steps...]) expression. See the Action section for available steps (ToAssistant, OpenUrl, Set).";
+
   const lines = [
     "## Component Signatures",
     "",
     "Arguments marked with ? are optional. Sub-components can be inline or referenced; prefer references for better streaming.",
-    "Props typed `ActionExpression` accept an Action([steps...]) expression. See the Action section for available steps (Run, ToAssistant, OpenUrl, Set).",
+    actionHint,
     "Props marked `$binding<type>` accept a `$variable` reference for two-way binding.",
   ];
 
@@ -546,20 +541,24 @@ export function generatePrompt(spec: PromptSpec): string {
   parts.push("");
   parts.push(generateComponentSignatures(spec));
 
-  // Built-in functions
-  if (hasTools) {
-    parts.push("");
-    parts.push(builtinFunctionsSection());
-  }
+  // Built-in functions — always included
+  parts.push("");
+  parts.push(builtinFunctionsSection());
 
-  // Query + Mutation + Action sections
+  // Query + Mutation sections (only with tools)
   if (hasTools) {
     parts.push("");
     parts.push(querySection());
     parts.push("");
     parts.push(mutationSection());
-    parts.push("");
-    parts.push(actionSection());
+  }
+
+  // Action section — always included (ToAssistant, OpenUrl, Set work without tools)
+  parts.push("");
+  parts.push(actionSection(hasTools));
+
+  // Interactive filters + forms (only with tools)
+  if (hasTools) {
     parts.push("");
     parts.push(interactiveFiltersSection());
   }
@@ -603,7 +602,7 @@ export function generatePrompt(spec: PromptSpec): string {
     parts.push(inlineModeSection());
   }
 
-  parts.push(importantRules(rootName, spec.inlineMode));
+  parts.push(importantRules(rootName, hasTools));
 
   if (spec.additionalRules?.length) {
     parts.push("");

@@ -33,6 +33,8 @@ export interface RendererProps {
   onParseResult?: (result: ParseResult | null) => void;
   /** Transport for Query() data fetching — MCP, REST, GraphQL, or any backend. */
   transport?: Transport | null;
+  /** Custom loading indicator shown while queries are fetching. Defaults to a spinner. */
+  queryLoader?: React.ReactNode;
 }
 
 // ─── Error boundary ───
@@ -148,23 +150,24 @@ function ensureLoadingStyle() {
   if (loadingStyleInjected || typeof document === "undefined") return;
   loadingStyleInjected = true;
   const style = document.createElement("style");
-  style.textContent = `@keyframes openui-loading-bar { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`;
+  style.textContent = `@keyframes openui-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
   document.head.appendChild(style);
 }
 
 // ─── Public component ───
 
-const LoadingBar = () => (
+const DefaultQueryLoader = () => (
   <div
     style={{
       position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      height: "3px",
-      background: "linear-gradient(90deg, transparent 0%, #3b82f6 50%, transparent 100%)",
-      backgroundSize: "200% 100%",
-      animation: "openui-loading-bar 1.5s ease-in-out infinite",
+      top: 8,
+      right: 8,
+      width: 16,
+      height: 16,
+      border: "2px solid #e5e7eb",
+      borderTopColor: "#3b82f6",
+      borderRadius: "50%",
+      animation: "openui-spin 0.6s linear infinite",
       zIndex: 10,
     }}
   />
@@ -179,6 +182,7 @@ export function Renderer({
   initialState,
   onParseResult,
   transport,
+  queryLoader,
 }: RendererProps) {
   useInsertionEffect(() => {
     ensureLoadingStyle();
@@ -213,7 +217,7 @@ export function Renderer({
   return (
     <OpenUIContext.Provider value={contextValue}>
       <div style={{ position: "relative" }}>
-        {isQueryLoading && <LoadingBar />}
+        {isQueryLoading && (queryLoader ?? <DefaultQueryLoader />)}
         <div style={{ opacity: isQueryLoading ? 0.7 : 1, transition: "opacity 0.2s ease" }}>
           <RenderNode node={result.root} />
         </div>

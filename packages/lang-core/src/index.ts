@@ -6,13 +6,15 @@ export type {
   DefinedComponent,
   Library,
   LibraryDefinition,
+  LibraryJSONSchema,
   PromptOptions,
   SubComponentOf,
+  ToolDescriptor,
 } from "./library";
 
 // ── Parser ──
 export { createParser, createStreamingParser, parse } from "./parser";
-export type { LibraryJSONSchema, Parser, StreamParser } from "./parser";
+export type { Parser, StreamParser } from "./parser";
 export { generatePrompt } from "./parser/prompt";
 export type { ComponentPromptSpec, McpToolSpec, PromptSpec } from "./parser/prompt";
 export { mergeStatements } from "./parser/merge";
@@ -33,6 +35,9 @@ export type {
 } from "./parser/types";
 export { isASTNode, isRuntimeExpr } from "./parser/ast";
 export type { ASTNode, CallNode, RuntimeExprNode, Statement } from "./parser/ast";
+
+// ── Reactive schema marker ──
+export { isReactiveSchema, markReactive } from "./reactive";
 
 // ── Validation ──
 export { builtInValidators, parseRules, parseStructuredRules, validate } from "./utils/validation";
