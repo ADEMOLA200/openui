@@ -67,7 +67,14 @@ export function defineArtifact<T extends z.ZodObject<any>>(config: DefineArtifac
   const { name, props, description, title, preview, panel, panelProps } = config;
 
   const component: ComponentRenderer<z.infer<T>> = ({ props: componentProps }) => {
+    // useId() produces positional IDs (e.g. :r1:) that are stable within a React tree
+    // but may shift on rehydration. This is safe because ChatProvider resets
+    // activeArtifactId on every thread switch, and the store is ephemeral (not persisted).
     const artifactId = useId();
+    // NOTE: ArtifactPanel also calls useArtifact(artifactId) internally, creating a
+    // second Zustand subscription on the same selector. This is harmless (cheap ===
+    // check) but redundant. If useArtifact ever gains side effects, consider passing
+    // pre-resolved state to ArtifactPanel instead.
     const { isActive, open, close, toggle } = useArtifact(artifactId);
 
     const controls: ArtifactControls = { isActive, open, close, toggle, artifactId };
