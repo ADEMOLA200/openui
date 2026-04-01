@@ -4,6 +4,7 @@ import clsx from "clsx";
 import React, { memo, useRef } from "react";
 import { useLayoutContext } from "../../context/LayoutContext";
 import { ScrollVariant, useScrollToBottom } from "../../hooks/useScrollToBottom";
+import { separateContentAndContext } from "../../utils/contentParser";
 import { ArtifactOverlay, ArtifactPortalTarget } from "../_shared/artifact";
 import { useShellStore } from "../_shared/store";
 import type { AssistantMessageComponent, UserMessageComponent } from "../_shared/types";
@@ -223,7 +224,9 @@ const UserMessageContent = ({ message }: { message: Message }) => {
   if (message.role !== "user") return null;
   const content = message.content;
   if (typeof content === "string") {
-    return <>{content}</>;
+    // Strip XML wrapper tags (<content>, <context>) so the bubble shows clean text
+    const { content: humanText } = separateContentAndContext(content);
+    return <>{humanText}</>;
   }
   // InputContent[] — render text parts
   return (
@@ -345,7 +348,7 @@ export const Messages = ({
               allMessages={messages}
               assistantMessage={assistantMessage}
               userMessage={userMessage}
-              isStreaming={isRunning && i === messages.length - 1} // TODO: This is a hack to determine if the message is the last one in the stream, need to adstruct this 
+              isStreaming={isRunning && i === messages.length - 1} // TODO: This is a hack to determine if the message is the last one in the stream, need to adstruct this
               // is streaming should be a boolean prop on the message object or some thing else ask @abhithesys
             />
           </MessageProvider>
