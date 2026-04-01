@@ -4,6 +4,7 @@ export type {
   ComponentGroup,
   ComponentRenderProps,
   ComponentRenderer,
+  CustomActionDefinition,
   DefinedComponent,
   Library,
   LibraryDefinition,

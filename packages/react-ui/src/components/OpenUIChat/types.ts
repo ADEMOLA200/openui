@@ -1,4 +1,4 @@
-import type { Library } from "@openuidev/react-lang";
+import type { ActionEvent, Library } from "@openuidev/react-lang";
 import { ReactNode } from "react";
 import { ScrollVariant } from "../../hooks/useScrollToBottom";
 import { ConversationStarterProps } from "../../types/ConversationStarter";
@@ -106,4 +106,12 @@ export interface SharedChatUIProps {
    * provided, `assistantMessage` takes priority.
    */
   componentLibrary?: Library;
+  /**
+   * Callback for custom action events from GenUI components.
+   * Called when a component triggers an action type other than the built-in
+   * ContinueConversation or OpenUrl. Requires `componentLibrary` to be set.
+   * When a custom `assistantMessage` is provided, that component is responsible
+   * for its own action handling and this callback is not wired.
+   */
+  onAction?: (event: ActionEvent) => void;
 }

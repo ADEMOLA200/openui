@@ -2,6 +2,7 @@ export { BottomTray } from "./ComposedBottomTray";
 export { Copilot } from "./ComposedCopilot";
 export { FullScreen } from "./ComposedStandalone";
 export { GenUIUserMessage } from "./GenUIUserMessage";
+export type { ActionEvent } from "@openuidev/react-lang";
 export type {
   AssistantMessageComponent,
   ComposerComponent,

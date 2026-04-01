@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { DefinedComponent, Library, PromptOptions } from "../library";
+import type { CustomActionDefinition, DefinedComponent, Library, PromptOptions } from "../library";
 
 const PREAMBLE = `You are an AI assistant that responds using openui-lang, a declarative UI language. Your ENTIRE response must be valid openui-lang code — no markdown, no explanations, just openui-lang.`;
 
@@ -239,14 +239,57 @@ function buildComponentLine(componentName: string, def: DefinedComponent): strin
   return sig;
 }
 
+// ─── Action description ───
+
+function mergeCustomActions(
+  libraryActions?: CustomActionDefinition[],
+  optionsActions?: CustomActionDefinition[],
+): CustomActionDefinition[] {
+  if (!libraryActions?.length && !optionsActions?.length) return [];
+  const merged = new Map<string, CustomActionDefinition>();
+  for (const a of libraryActions ?? []) merged.set(a.type, a);
+  for (const a of optionsActions ?? []) merged.set(a.type, a);
+  return Array.from(merged.values());
+}
+
+function generateActionDescription(
+  libraryActions?: CustomActionDefinition[],
+  optionsActions?: CustomActionDefinition[],
+): string {
+  const customActions = mergeCustomActions(libraryActions, optionsActions);
+
+  const builtinLine =
+    "The `action` prop type accepts: ContinueConversation (sends message to LLM), OpenUrl (navigates to URL).";
+
+  if (customActions.length === 0) return builtinLine;
+
+  const lines: string[] = [builtinLine, "", "Custom actions available:"];
+  for (const action of customActions) {
+    let line = `- "${action.type}": ${action.description}`;
+    if (action.params && Object.keys(action.params).length > 0) {
+      const paramList = Object.entries(action.params)
+        .map(([name, desc]) => `${name} (${desc})`)
+        .join(", ");
+      line += ` -- params: ${paramList}`;
+    }
+    lines.push(line);
+  }
+  lines.push("");
+  lines.push(
+    'Use custom actions in Button like: Button("Download PDF", { type: "download_report", params: { format: "pdf" } }, "primary")',
+  );
+
+  return lines.join("\n");
+}
+
 // ─── Prompt assembly ───
 
-function generateComponentSignatures(library: Library): string {
+function generateComponentSignatures(library: Library, options?: PromptOptions): string {
   const lines: string[] = [
     "## Component Signatures",
     "",
     "Arguments marked with ? are optional. Sub-components can be inline or referenced; prefer references for better streaming.",
-    "The `action` prop type accepts: ContinueConversation (sends message to LLM), OpenUrl (navigates to URL), or Custom (app-defined).",
+    generateActionDescription(library.customActions, options?.customActions),
   ];
 
   if (library.componentGroups?.length) {
@@ -308,7 +351,7 @@ export function generatePrompt(library: Library, options?: PromptOptions): strin
   parts.push("");
   parts.push(syntaxRules(rootName));
   parts.push("");
-  parts.push(generateComponentSignatures(library));
+  parts.push(generateComponentSignatures(library, options));
   parts.push("");
   parts.push(streamingRules(rootName));
 

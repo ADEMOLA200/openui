@@ -10,7 +10,12 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 
 // Re-export framework-agnostic types unchanged
-export type { ComponentGroup, PromptOptions, SubComponentOf } from "@openuidev/lang-core";
+export type {
+  ComponentGroup,
+  CustomActionDefinition,
+  PromptOptions,
+  SubComponentOf,
+} from "@openuidev/lang-core";
 
 // ─── React-specific types ───────────────────────────────────────────────────
 

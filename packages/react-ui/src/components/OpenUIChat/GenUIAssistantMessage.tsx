@@ -13,9 +13,11 @@ import { ToolResult } from "../ToolResult";
 export const GenUIAssistantMessage = ({
   message,
   library,
+  onCustomAction,
 }: {
   message: AssistantMessage;
   library: Library;
+  onCustomAction?: (event: ActionEvent) => void;
 }) => {
   const messages = useThread((s) => s.messages);
   const isRunning = useThread((s) => s.isRunning);
@@ -105,9 +107,11 @@ export const GenUIAssistantMessage = ({
         if (typeof window !== "undefined" && url) {
           window.open(url, "_blank");
         }
+      } else {
+        onCustomAction?.(event);
       }
     },
-    [processMessage],
+    [processMessage, onCustomAction],
   );
 
   const hasToolActivity =

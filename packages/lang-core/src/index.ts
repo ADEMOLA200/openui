@@ -3,6 +3,7 @@ export { createLibrary, defineComponent } from "./library";
 export type {
   ComponentGroup,
   ComponentRenderProps,
+  CustomActionDefinition,
   DefinedComponent,
   Library,
   LibraryDefinition,

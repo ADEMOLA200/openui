@@ -70,10 +70,17 @@ export interface ComponentGroup {
   notes?: string[];
 }
 
+export interface CustomActionDefinition {
+  type: string;
+  description: string;
+  params?: Record<string, string>;
+}
+
 export interface PromptOptions {
   preamble?: string;
   additionalRules?: string[];
   examples?: string[];
+  customActions?: CustomActionDefinition[];
 }
 
 // ─── Library ──────────────────────────────────────────────────────────────────
@@ -81,6 +88,7 @@ export interface PromptOptions {
 export interface Library<C = unknown> {
   readonly components: Record<string, DefinedComponent<any, C>>;
   readonly componentGroups: ComponentGroup[] | undefined;
+  readonly customActions: CustomActionDefinition[] | undefined;
   readonly root: string | undefined;
 
   prompt(options?: PromptOptions): string;
@@ -90,6 +98,7 @@ export interface Library<C = unknown> {
 export interface LibraryDefinition<C = unknown> {
   components: DefinedComponent<any, C>[];
   componentGroups?: ComponentGroup[];
+  customActions?: CustomActionDefinition[];
   root?: string;
 }
 
@@ -115,6 +124,7 @@ export function createLibrary<C = unknown>(input: LibraryDefinition<C>): Library
   const library: Library<C> = {
     components: componentsRecord,
     componentGroups: input.componentGroups,
+    customActions: input.customActions,
     root: input.root,
 
     prompt(options?: PromptOptions): string {
