@@ -171,10 +171,8 @@ export function evaluate(
         case "==":
           // Use loose equality so that e.g. 5 == "5" is true,
           // consistent with the toNumber coercion used by comparison operators.
-          // eslint-disable-next-line eqeqeq
           return left == right;
         case "!=":
-          // eslint-disable-next-line eqeqeq
           return left != right;
         case ">":
           return toNumber(left) > toNumber(right);
@@ -341,38 +339,6 @@ function evaluatePropInline(
   }
 
   return value;
-}
-
-/**
- * Check if an AST node contains any Ref nodes (loop variables like `t` from Each).
- * These must be resolved eagerly because they won't exist in scope at click time.
- */
-function containsRef(node: ASTNode): boolean {
-  switch (node.k) {
-    case "Ref":
-      return true;
-    case "Member":
-      return isASTNode(node.obj) ? containsRef(node.obj as ASTNode) : false;
-    case "Index":
-      return (
-        (isASTNode(node.obj) && containsRef(node.obj as ASTNode)) ||
-        (isASTNode(node.index) && containsRef(node.index as ASTNode))
-      );
-    case "BinOp":
-      return containsRef(node.left) || containsRef(node.right);
-    case "UnaryOp":
-      return containsRef(node.operand);
-    case "Ternary":
-      return containsRef(node.cond) || containsRef(node.then) || containsRef(node.else);
-    case "Arr":
-      return node.els.some(containsRef);
-    case "Obj":
-      return node.entries.some(([, v]) => containsRef(v));
-    case "Comp":
-      return node.args.some(containsRef);
-    default:
-      return false;
-  }
 }
 
 /** Convert a resolved runtime value back to a literal AST node for deferred evaluation. */
@@ -551,7 +517,7 @@ function evaluateLazyBuiltin(
     if (!varName) return [];
     const template = args[2];
 
-    return arr.map((item, idx) => {
+    return arr.map((item, _idx) => {
       // Pre-substitute loop variable refs with concrete values in the template AST.
       // This captures the item for deferred expressions (Action steps evaluated at click time).
       const substituted = substituteRef(template, varName, item);

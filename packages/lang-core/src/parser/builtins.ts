@@ -128,10 +128,8 @@ export const BUILTINS: Record<string, BuiltinDef> = {
         const v = f ? resolveField(item, f) : item;
         switch (o) {
           case "==":
-            // eslint-disable-next-line eqeqeq
             return v == value;
           case "!=":
-            // eslint-disable-next-line eqeqeq
             return v != value;
           case ">":
             return toNumber(v) > toNumber(value);
