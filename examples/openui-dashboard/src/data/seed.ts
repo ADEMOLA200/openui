@@ -21,7 +21,7 @@ export const seedTeams: Team[] = [
   {
     id: teamId,
     key: "TH",
-    name: "Thesys",
+    name: "Tangential",
     description: "Internal product and platform team",
     color: "#5e6ad2",
     icon: "sparkles",

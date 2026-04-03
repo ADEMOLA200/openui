@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Linear Clone Dashboard",
+  title: "Tangential",
   description: "Dummy Linear-like app with mock API endpoints",
 };
 

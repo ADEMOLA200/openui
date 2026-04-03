@@ -9,11 +9,6 @@ export const TopBar = () => {
     <div className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--panel)]/95 px-5 py-3 backdrop-blur">
       <div className="mb-3 flex items-center justify-between text-xs text-[var(--muted)]">
         <div className="flex items-center gap-2">
-          <span className="rounded-md bg-[#1b2332] px-2 py-0.5 text-[11px] text-[#7f96ff]">
-            Beta
-          </span>
-          <span>Thesys</span>
-          <span>/</span>
           <span>All Issues</span>
         </div>
       </div>

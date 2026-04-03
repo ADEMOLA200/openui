@@ -91,7 +91,7 @@ export const Sidebar = () => {
           <div className="size-6 rounded-md bg-[#5e6ad2] text-center text-xs leading-6 font-semibold text-white">
             T
           </div>
-          <div className="text-sm font-medium">Thesys</div>
+          <div className="text-sm font-medium">Tangential</div>
         </div>
         <span className="rounded bg-[var(--hover)] px-1.5 py-0.5 text-[10px] text-[var(--muted)]">
           v1
