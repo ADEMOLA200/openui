@@ -7,16 +7,22 @@ The system prompt tells the LLM how to output valid OpenUI Lang. There are two w
 
 ## 1. CLI (recommended for most setups)
 
-Generate from your library file - works with any backend language:
+The fastest way to generate a system prompt — works with any backend language:
 
 ```bash
-npx @openuidev/cli generate ./src/library.ts --out system-prompt.txt
+npx @openuidev/cli@latest generate ./src/library.ts
+```
+
+Write to a file:
+
+```bash
+npx @openuidev/cli@latest generate ./src/library.ts --out system-prompt.txt
 ```
 
 Generate the component spec as JSON (for use with `generatePrompt`):
 
 ```bash
-npx @openuidev/cli generate ./src/library.ts --json-schema
+npx @openuidev/cli@latest generate ./src/library.ts --json-schema
 ```
 
 The CLI auto-detects exported `PromptOptions` (examples, rules) alongside your library. Use `--prompt-options <name>` to pick a specific export.
