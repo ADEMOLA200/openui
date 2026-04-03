@@ -18,7 +18,7 @@ interface ParsedStatement {
 function splitStatementSource(input: string): string[] {
   const stmts: string[] = [];
   let depth = 0;
-  let inStr = false;
+  let inStr: false | '"' | "'" = false;
   let esc = false;
   let start = 0;
 
@@ -33,11 +33,14 @@ function splitStatementSource(input: string): string[] {
       esc = true;
       continue;
     }
-    if (c === '"') {
-      inStr = !inStr;
+    if (inStr) {
+      if (c === inStr) inStr = false;
       continue;
     }
-    if (inStr) continue;
+    if (c === '"' || c === "'") {
+      inStr = c;
+      continue;
+    }
 
     if (c === "(" || c === "[" || c === "{") depth++;
     else if (c === ")" || c === "]" || c === "}") depth = Math.max(0, depth - 1);
@@ -143,16 +146,6 @@ export function mergeStatements(existing: string, patch: string, rootId = "root"
     return patchStmts.map((stmt) => stmt.raw).join("\n");
   }
   if (!patchStmts.length) return existing;
-
-  // Rewrite guard: if patch re-emits >80% of existing statements, warn
-  const overlapCount = patchStmts.filter((p) => existingStmts.some((e) => e.id === p.id)).length;
-  const overlapRatio = existingStmts.length > 0 ? overlapCount / existingStmts.length : 0;
-
-  if (overlapRatio > 0.8 && patchStmts.length >= existingStmts.length * 0.8) {
-    console.warn(
-      `[openui merge] Patch re-emits ${Math.round(overlapRatio * 100)}% of existing statements — this looks like a full rewrite, not an edit.`,
-    );
-  }
 
   // Merge: patch statements override existing by name
   const merged = new Map<string, string>();

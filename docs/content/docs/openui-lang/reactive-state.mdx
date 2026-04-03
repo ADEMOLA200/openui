@@ -3,7 +3,7 @@ title: Reactive State
 description: Make your UI interactive with $variables that update automatically.
 ---
 
-Every UI needs state — which tab is selected, what the user typed, whether a modal is open.
+Every UI needs state - which tab is selected, what the user typed, whether a modal is open.
 In OpenUI Lang, state is declared with `$variables`.
 
 ## Declaring a variable
@@ -52,7 +52,7 @@ data = Query("analytics", {days: $days}, {rows: []})
 ```
 
 When `$days` changes (user picks "30" in the Select), the title updates and the Query
-re-fetches with the new value. This happens automatically — no wiring needed.
+re-fetches with the new value. This happens automatically - no wiring needed.
 
 ## Changing state from buttons
 
@@ -109,7 +109,7 @@ status == "error" ? Callout("error", "Failed", errorMsg) : null
           └──▶ LineChart(data.rows.day, [...])       → re-renders with new data
 ```
 
-`[placeholder image: Reactivity chain diagram — $days changes → Select updates display, Query re-fetches with new args, TextContent re-evaluates, Chart re-renders. All automatic, no wiring.]`
+`[placeholder image: Reactivity chain diagram - $days changes → Select updates display, Query re-fetches with new args, TextContent re-evaluates, Chart re-renders. All automatic, no wiring.]`
 
 When a `$variable` changes:
 
@@ -119,14 +119,3 @@ When a `$variable` changes:
 4. The UI re-renders with new values
 
 No event listeners. No useEffect. No wiring. Just declare and reference.
-
-## Next steps
-
-<Cards>
-  <Card title="Queries & Mutations" href="/docs/openui-lang/queries-mutations">
-    Fetch and write data from your tools using reactive $variables.
-  </Card>
-  <Card title="Interactivity" href="/docs/openui-lang/interactivity">
-    Build components that support $variable binding with useStateField.
-  </Card>
-</Cards>

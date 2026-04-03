@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ComponentPromptSpec, McpToolSpec, PromptSpec } from "./parser/prompt";
+import type { ComponentPromptSpec, PromptSpec, ToolSpec } from "./parser/prompt";
 import { generatePrompt } from "./parser/prompt";
 import type { LibraryJSONSchema } from "./parser/types";
 import { isReactiveSchema } from "./reactive";
@@ -75,8 +75,8 @@ export interface ComponentGroup {
   notes?: string[];
 }
 
-/** Tool descriptor for prompt generation — simple string or rich McpToolSpec. */
-export type ToolDescriptor = string | McpToolSpec;
+/** Tool descriptor for prompt generation — simple string or rich ToolSpec. */
+export type ToolDescriptor = string | ToolSpec;
 
 export interface PromptOptions {
   preamble?: string;
@@ -85,7 +85,7 @@ export interface PromptOptions {
   examples?: string[];
   /** Examples shown when tools ARE present (Query/Mutation patterns). Takes priority over `examples`. */
   toolExamples?: string[];
-  /** Available tools for Query() — string names or rich McpToolSpec descriptors injected into the prompt. */
+  /** Available tools for Query() — string names or rich ToolSpec descriptors injected into the prompt. */
   tools?: ToolDescriptor[];
   /** Enable edit-mode instructions in the prompt. */
   editMode?: boolean;

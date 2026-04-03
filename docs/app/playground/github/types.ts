@@ -1,4 +1,4 @@
-import type { McpToolSpec } from "@openuidev/lang-core";
+import type { ToolSpec } from "@openuidev/lang-core";
 
 // ── Transformed GitHub data interfaces ────────────────────────────────────
 
@@ -62,9 +62,9 @@ export interface Bookmark {
   created_at: string;
 }
 
-// ── McpToolSpec definitions for system prompt ──────────────────────────────
+// ── ToolSpec definitions for system prompt ──────────────────────────────
 
-export const GITHUB_TOOL_SPECS: McpToolSpec[] = [
+export const GITHUB_TOOL_SPECS: ToolSpec[] = [
   {
     name: "get_profile",
     description:

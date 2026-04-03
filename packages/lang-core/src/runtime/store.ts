@@ -74,16 +74,17 @@ export function createStore(): Store {
   }
 
   function initialize(defaults: Record<string, unknown>, persisted: Record<string, unknown>): void {
-    // Remove stale $binding keys not present in new declarations
-    for (const key of [...state.keys()]) {
-      if (key.startsWith("$") && !(key in defaults) && !(key in persisted)) {
-        state.delete(key);
-      }
+    // Apply persisted values (explicit restore) and defaults for NEW keys only.
+    // Existing user-modified $binding values are always preserved — never
+    // overwrite with defaults, never delete. During streaming, declarations
+    // can temporarily disappear; deleting user state here would cause data loss.
+    for (const key of Object.keys(persisted)) {
+      state.set(key, persisted[key]);
     }
-    // Set all binding defaults and persisted values
-    const allKeys = new Set([...Object.keys(defaults), ...Object.keys(persisted)]);
-    for (const key of allKeys) {
-      state.set(key, key in persisted ? persisted[key] : defaults[key]);
+    for (const key of Object.keys(defaults)) {
+      if (!state.has(key)) {
+        state.set(key, defaults[key]);
+      }
     }
     rebuildSnapshot();
     notify();

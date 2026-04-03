@@ -1,6 +1,6 @@
 ---
 title: Incremental Editing
-description: Edit existing UIs efficiently — the LLM patches only what changed, the parser merges it.
+description: Edit existing UIs efficiently - the LLM patches only what changed, the parser merges it.
 ---
 
 When a user says "add a pie chart" to an existing dashboard, the LLM doesn't regenerate everything.
@@ -20,9 +20,9 @@ It outputs only the changed and new statements. The parser merges them into the 
  LLM only output 2 lines (root + chart). Parser merged by name.
 ```
 
-`[placeholder gif: User has a dashboard with a table. Types "add a pie chart". LLM streams just 2-3 new lines. Chart appears next to existing table — rest of UI stays intact.]`
+`[placeholder gif: User has a dashboard with a table. Types "add a pie chart". LLM streams just 2-3 new lines. Chart appears next to existing table - rest of UI stays intact.]`
 
-**Initial generation** — LLM outputs full code:
+**Initial generation** - LLM outputs full code:
 
 ```text
 root = Stack([header, tbl])
@@ -58,10 +58,10 @@ The parser merges by statement name:
 
 ## Why this matters
 
-- **Fewer tokens** — LLM outputs 2-3 lines instead of regenerating 20+
-- **Faster** — less to stream, less to parse
-- **Preserves context** — existing queries, state, and bindings stay intact
-- **Works with streaming** — each patched line renders as it arrives
+- **Fewer tokens** - LLM outputs 2-3 lines instead of regenerating 20+
+- **Faster** - less to stream, less to parse
+- **Preserves context** - existing queries, state, and bindings stay intact
+- **Works with streaming** - each patched line renders as it arrives
 
 ```
   ┌─────────────────────────┐     ┌─────────────────────────┐
@@ -73,10 +73,10 @@ The parser merges by statement name:
   │                         │     │                         │
   │ ████████████████████    │     │ ███                     │
   └─────────────────────────┘     └─────────────────────────┘
-                Same result — up to 85% fewer tokens.
+                Same result - up to 85% fewer tokens.
 ```
 
-`[placeholder image: Side-by-side comparison — Full regen: 20 lines, ~400 tokens vs Patch: 3 lines, ~60 tokens. Same result, 85% fewer tokens.]`
+`[placeholder image: Side-by-side comparison - Full regen: 20 lines, ~400 tokens vs Patch: 3 lines, ~60 tokens. Same result, 85% fewer tokens.]`
 
 ## Enabling edit mode
 
@@ -94,14 +94,3 @@ The `inlineMode` flag lets the LLM respond with explanation text alongside the c
 so it can say "I added a pie chart" before the code block.
 
 See [System Prompts](/docs/openui-lang/system-prompts) for the full `PromptSpec` reference.
-
-## Next steps
-
-<Cards>
-  <Card title="Built-in Functions" href="/docs/openui-lang/builtins">
-    @Count, @Filter, @Sort, @Each — transform data inline.
-  </Card>
-  <Card title="System Prompts" href="/docs/openui-lang/system-prompts">
-    Configure prompt generation with PromptSpec flags.
-  </Card>
-</Cards>

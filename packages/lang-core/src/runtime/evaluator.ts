@@ -9,6 +9,7 @@ import { ACTION_NAMES, ACTION_STEPS, BUILTINS, LAZY_BUILTINS, toNumber } from ".
 import type { ActionPlan, ActionStep, ElementNode } from "../parser/types";
 import { isElementNode } from "../parser/types";
 import { isReactiveSchema } from "../reactive";
+import { evaluatePropCore } from "./evaluate-prop";
 
 /** Optional schema context for reactive-aware evaluation. */
 export interface SchemaContext {
@@ -268,8 +269,8 @@ function evaluateElementInline(
 }
 
 /**
- * Evaluate a single prop value with schema awareness. Handles AST nodes,
- * ReactiveAssign markers, nested ElementNodes, arrays, and ActionPlans.
+ * Evaluate a single prop value with schema awareness.
+ * Delegates to shared evaluatePropCore with inline-specific recursion callbacks.
  */
 function evaluatePropInline(
   value: unknown,
@@ -277,68 +278,10 @@ function evaluatePropInline(
   schemaCtx: SchemaContext,
   reactiveSchema?: unknown,
 ): unknown {
-  if (value == null) return value;
-  if (typeof value !== "object") return value;
-
-  // AST node
-  if (isASTNode(value)) {
-    if (value.k === "StateRef" && reactiveSchema && isReactiveSchema(reactiveSchema)) {
-      return {
-        __reactive: "assign" as const,
-        target: value.n,
-        expr: { k: "StateRef" as const, n: "$value" },
-      };
-    }
-    const result = evaluate(value, context, schemaCtx);
-    if (isElementNode(result)) return evaluateElementInline(result, context, schemaCtx);
-    if (Array.isArray(result)) {
-      return result.map((item) =>
-        isElementNode(item) ? evaluateElementInline(item, context, schemaCtx) : item,
-      );
-    }
-    if (isReactiveAssign(result) && !(reactiveSchema && isReactiveSchema(reactiveSchema))) {
-      return context.getState(result.target) ?? null;
-    }
-    return result;
-  }
-
-  // String on reactive schema → pass through (component's useStateField resolves it)
-  if (typeof value === "string" && reactiveSchema && isReactiveSchema(reactiveSchema)) {
-    return value;
-  }
-
-  // Array
-  if (Array.isArray(value)) {
-    return value.map((v) => evaluatePropInline(v, context, schemaCtx, reactiveSchema));
-  }
-
-  // ElementNode → recurse with schema
-  if (isElementNode(value)) {
-    return evaluateElementInline(value, context, schemaCtx);
-  }
-
-  // ActionPlan / ActionStep — preserve as-is
-  const obj = value as Record<string, unknown>;
-  if ("steps" in obj && Array.isArray(obj.steps)) return value;
-  if ("type" in obj && "valueAST" in obj) return value;
-
-  // Plain data object — recurse
-  let needsEval = false;
-  for (const val of Object.values(obj)) {
-    if (typeof val === "object" && val !== null) {
-      needsEval = true;
-      break;
-    }
-  }
-  if (needsEval) {
-    const result: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(obj)) {
-      result[k] = evaluatePropInline(v, context, schemaCtx);
-    }
-    return result;
-  }
-
-  return value;
+  return evaluatePropCore(value, context, schemaCtx, reactiveSchema, {
+    recurseElement: (el) => evaluateElementInline(el, context, schemaCtx),
+    recurse: (v, rs) => evaluatePropInline(v, context, schemaCtx, rs),
+  });
 }
 
 /** Convert a resolved runtime value back to a literal AST node for deferred evaluation. */

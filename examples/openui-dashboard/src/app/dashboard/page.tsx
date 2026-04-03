@@ -1,8 +1,8 @@
 "use client";
 
 import "@openuidev/react-ui/components.css";
-import { Renderer, connectMcp, mergeStatements } from "@openuidev/react-lang";
-import type { ToolProvider, McpConnection } from "@openuidev/react-lang";
+import { Renderer, extractToolResult, mergeStatements } from "@openuidev/react-lang";
+import type { McpClientLike } from "@openuidev/react-lang";
 import { openuiLibrary } from "@openuidev/react-ui/genui-lib";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ThemeProvider, MarkDownRenderer } from "@openuidev/react-ui";
@@ -19,21 +19,22 @@ function notifyToolCalls() {
   toolCallListener?.([...activeCalls]);
 }
 
-function wrapToolProvider(inner: ToolProvider): ToolProvider {
+function wrapMcpClient(client: McpClientLike): McpClientLike {
   return {
-    callTool: async (toolName, args) => {
-      const entry: ToolCallEntry = { tool: toolName, status: "pending" };
+    ...client,
+    callTool: async (params, options) => {
+      const entry: ToolCallEntry = { tool: params.name, status: "pending" };
       activeCalls.push(entry);
       notifyToolCalls();
       try {
-        const data = await inner.callTool(toolName, args);
+        const result = await client.callTool(params, options);
         entry.status = "done";
         notifyToolCalls();
-        return data;
-      } catch {
+        return result;
+      } catch (err) {
         entry.status = "error";
         notifyToolCalls();
-        return null;
+        throw err;
       }
     },
   };
@@ -227,18 +228,28 @@ export default function LLMTestPage() {
   const responseRef = useRef("");
   const inputRef = useRef<HTMLInputElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [toolProvider, setToolProvider] = useState<ToolProvider | null>(null);
-  const mcpRef = useRef<McpConnection | null>(null);
+  const [toolProvider, setToolProvider] = useState<McpClientLike | null>(null);
+  const clientRef = useRef<McpClientLike | null>(null);
 
   // MCP setup
   useEffect(() => {
     let cancelled = false;
-    connectMcp({ url: "/api/mcp" }).then((mcp) => {
-      if (cancelled) { mcp.disconnect(); return; }
-      mcpRef.current = mcp;
-      setToolProvider(wrapToolProvider(mcp));
-    }).catch((err) => console.error("[mcp] Failed:", err));
-    return () => { cancelled = true; mcpRef.current?.disconnect(); };
+    (async () => {
+      try {
+        const { Client } = await import("@modelcontextprotocol/sdk/client/index.js");
+        const { StreamableHTTPClientTransport } = await import("@modelcontextprotocol/sdk/client/streamableHttp.js");
+        const client = new Client({ name: "openui-dashboard", version: "1.0.0" });
+        const transport = new StreamableHTTPClientTransport(new URL("/api/mcp", globalThis.location.href));
+        await client.connect(transport);
+        if (cancelled) { client.close?.(); return; }
+        const mcpClient = client as unknown as McpClientLike;
+        clientRef.current = mcpClient;
+        setToolProvider(wrapMcpClient(mcpClient));
+      } catch (err) {
+        console.error("[mcp] Failed:", err);
+      }
+    })();
+    return () => { cancelled = true; clientRef.current?.close?.(); };
   }, []);
 
   useEffect(() => {

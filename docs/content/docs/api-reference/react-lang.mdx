@@ -100,37 +100,22 @@ interface RendererProps {
   initialState?: Record<string, any>;
   onParseResult?: (result: ParseResult | null) => void;
   toolProvider?:
-    | ToolProvider
     | Record<string, (args: Record<string, unknown>) => Promise<unknown>>
+    | McpClientLike
     | null;
   queryLoader?: React.ReactNode;
   onError?: (errors: OpenUIError[]) => void;
 }
 ```
 
-## ToolProvider
+## Tool Provider
 
-Handles `Query()` and `Mutation()` tool calls at runtime. The `toolProvider` prop accepts three forms:
+Handles `Query()` and `Mutation()` tool calls at runtime. The `toolProvider` prop accepts two forms:
 
-```ts
-interface ToolProvider {
-  callTool(toolName: string, args: Record<string, unknown>): Promise<unknown>;
-}
-```
+- **Function map** — `Record<string, (args) => Promise<unknown>>` — the simplest option
+- **MCP client** — any object implementing `callTool({ name, arguments })` (e.g. from `@modelcontextprotocol/sdk`)
 
-- **ToolProvider object** — implements `callTool`
-- **Function map** — `Record<string, (args) => Promise<unknown>>` — auto-normalized
-- **MCP connection** — from `connectMcp()` (has `callTool` plus `listTools` and `disconnect`)
-
-```ts
-function connectMcp(options: { url: string }): Promise<McpConnection>;
-
-interface McpConnection {
-  callTool(toolName: string, args: Record<string, unknown>): Promise<unknown>;
-  listTools(): Promise<McpToolSpec[]>;
-  disconnect(): Promise<void>;
-}
-```
+The Renderer detects which form was passed and normalizes internally.
 
 ## Error types
 
@@ -153,7 +138,7 @@ class ToolNotFoundError extends Error {
 }
 ```
 
-Error codes: `unknown-component`, `missing-required`, `null-required`, `inline-reserved`, `tool-not-found`.
+Error codes: `unknown-component`, `missing-required`, `null-required`, `inline-reserved`, `tool-not-found`, `parse-failed`, `parse-exception`, `runtime-error`, `render-error`.
 
 ## Actions
 

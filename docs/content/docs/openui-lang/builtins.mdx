@@ -3,7 +3,7 @@ title: Built-in Functions
 description: Transform, filter, and aggregate data with @-prefixed built-in functions.
 ---
 
-Built-in functions start with `@` — this tells the LLM "this is a function, not a component."
+Built-in functions start with `@` - this tells the LLM "this is a function, not a component."
 
 ## Aggregation
 
@@ -67,18 +67,6 @@ Render a template for every item in an array:
 
 The second argument (`"t"`) is the loop variable name. Use it inside the template.
 
-**Important:** The loop variable only exists inside `@Each`. Don't extract the template
-to a separate statement — `t` won't be defined there.
-
-```text
-// CORRECT — inline template
-Col("Tags", @Each(rows, "t", Tag(t.status)))
-
-// WRONG — t is undefined in myTag
-myTag = Tag(t.status)
-Col("Tags", @Each(rows, "t", myTag))
-```
-
 ## Action steps
 
 These are used inside `Action([...])` to wire button clicks:
@@ -94,14 +82,3 @@ These are used inside `Action([...])` to wire button clicks:
 ```text
 submitBtn = Button("Create", Action([@Run(mutation), @Run(query), @Reset($title)]))
 ```
-
-## Next steps
-
-<Cards>
-  <Card title="Language Specification (v0.5)" href="/docs/openui-lang/specification-v05">
-    Full grammar, expression types, and parser semantics.
-  </Card>
-  <Card title="Troubleshooting" href="/docs/openui-lang/troubleshooting">
-    Common issues and debugging tips.
-  </Card>
-</Cards>

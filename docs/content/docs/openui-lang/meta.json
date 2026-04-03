@@ -3,7 +3,9 @@
   "root": true,
   "pages": [
     "index",
-    "quickstart",
+    "---Quick Start---",
+    "quickstart-chat",
+    "quickstart-dashboard",
     "---Core Concepts---",
     "overview",
     "defining-components",

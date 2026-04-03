@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
-import { generatePrompt, type McpToolSpec } from "@openuidev/lang-core";
+import { generatePrompt, type ToolSpec } from "@openuidev/lang-core";
 import { promptSpec } from "../../../prompt-config";
 import { tools as toolDefs } from "../../../tools";
 import { z } from "zod";
@@ -99,11 +99,11 @@ function sseToolCallArgs(
 // ── Dynamic system prompt ──
 
 function buildSystemPrompt(): string {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mcpTools: McpToolSpec[] = tools.map((t: any) => ({
-    name: t.function.name,
-    description: t.function.description,
-    inputSchema: t.function.parameters,
+  const mcpTools: ToolSpec[] = toolDefs.map((t) => ({
+    name: t.name,
+    description: t.description,
+    inputSchema: zodToJsonSchema(t.inputSchema),
+    outputSchema: z.toJSONSchema(t.outputSchema) as Record<string, unknown>,
   }));
 
   return generatePrompt({

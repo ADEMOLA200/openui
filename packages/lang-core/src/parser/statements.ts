@@ -17,8 +17,8 @@ export interface RawStmt {
  */
 export function autoClose(input: string): { text: string; wasIncomplete: boolean } {
   const stack: string[] = [];
-  let inStr = false,
-    esc = false;
+  let inStr: false | '"' | "'" = false;
+  let esc = false;
 
   for (let i = 0; i < input.length; i++) {
     const c = input[i];
@@ -30,25 +30,28 @@ export function autoClose(input: string): { text: string; wasIncomplete: boolean
       esc = true;
       continue;
     }
-    if (c === '"') {
-      inStr = !inStr;
+    if (inStr) {
+      if (c === inStr) inStr = false;
       continue;
     }
-    if (inStr) continue;
+    if (c === '"' || c === "'") {
+      inStr = c;
+      continue;
+    }
     if (c === "(" || c === "[" || c === "{") stack.push(c);
     else if (c === ")" && stack[stack.length - 1] === "(") stack.pop();
     else if (c === "]" && stack[stack.length - 1] === "[") stack.pop();
     else if (c === "}" && stack[stack.length - 1] === "{") stack.pop();
   }
 
-  const wasIncomplete = inStr || stack.length > 0;
+  const wasIncomplete = !!inStr || stack.length > 0;
   if (!wasIncomplete) return { text: input, wasIncomplete: false };
 
   let out = input;
   if (inStr) {
     if (esc) out += "\\";
-    out += '"';
-  } // close open string
+    out += inStr; // close with matching quote
+  }
   for (let j = stack.length - 1; j >= 0; j--)
     out += stack[j] === "(" ? ")" : stack[j] === "[" ? "]" : "}";
 

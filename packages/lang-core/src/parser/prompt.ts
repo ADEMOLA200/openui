@@ -2,11 +2,15 @@ import { BUILTINS, LAZY_BUILTIN_DEFS } from "./builtins";
 
 // ─── PromptSpec types (JSON-serializable, no Zod deps) ──────────────────────
 
-export interface McpToolSpec {
+/**
+ * Tool schema for prompt generation — describes a tool the LLM can use via Query()/Mutation().
+ * Shape inspired by MCP's tool schema (name, description, inputSchema, annotations).
+ */
+export interface ToolSpec {
   name: string;
   description?: string;
-  inputSchema?: Record<string, unknown>;
-  outputSchema?: Record<string, unknown>;
+  inputSchema: Record<string, unknown>;
+  outputSchema: Record<string, unknown>;
   annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean };
 }
 
@@ -25,7 +29,7 @@ export interface PromptSpec {
   root?: string;
   components: Record<string, ComponentPromptSpec>;
   componentGroups?: ComponentGroup[];
-  tools?: (string | McpToolSpec)[];
+  tools?: (string | ToolSpec)[];
   editMode?: boolean;
   inlineMode?: boolean;
   /** Enable Query(), Mutation(), @Run, tool workflow. Default: true if tools provided. */
@@ -430,7 +434,7 @@ ${verifyLines.join("\n")}`;
 
 // ─── Tool rendering ─────────────────────────────────────────────────────────
 
-function renderToolSignature(tool: McpToolSpec): string {
+function renderToolSignature(tool: ToolSpec): string {
   let args = "";
   if (tool.inputSchema) {
     const props = (tool.inputSchema as any).properties as
@@ -459,11 +463,11 @@ function renderToolSignature(tool: McpToolSpec): string {
   return line;
 }
 
-function renderToolsSection(tools: (string | McpToolSpec)[]): string {
+function renderToolsSection(tools: (string | ToolSpec)[]): string {
   const lines: string[] = [];
 
   const stringTools: string[] = [];
-  const specTools: McpToolSpec[] = [];
+  const specTools: ToolSpec[] = [];
 
   for (const tool of tools) {
     if (typeof tool === "string") {
@@ -486,7 +490,7 @@ function renderToolsSection(tools: (string | McpToolSpec)[]): string {
     lines.push(renderToolSignature(t));
   }
 
-  // Default values hint for McpToolSpec tools with outputSchema
+  // Default values hint for ToolSpec tools with outputSchema
   const toolsWithOutput = specTools.filter((t) => t.outputSchema);
   if (toolsWithOutput.length > 0) {
     lines.push("");

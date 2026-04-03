@@ -122,7 +122,14 @@ function materializeExprInternal(
         }
         return { ...node, args: recursedArgs, mappedProps };
       }
-      // Unknown component: recurse args
+      // Unknown component in expression: push error (same as value path)
+      ctx.errors.push({
+        code: "unknown-component",
+        component: node.name,
+        path: "",
+        message: `Unknown component "${node.name}" — not found in catalog or builtins`,
+        statementId: ctx.currentStatementId,
+      });
       return { ...node, args: recursedArgs };
     }
 

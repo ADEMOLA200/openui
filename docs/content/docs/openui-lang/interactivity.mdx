@@ -43,14 +43,14 @@ enum BuiltinActionType {
 }
 ```
 
-- `ContinueConversation` — sends the user's intent back to the LLM (`@ToAssistant`).
-- `OpenUrl` — opens a URL in a new tab (`@OpenUrl`).
+- `ContinueConversation`: sends the user's intent back to the LLM (`@ToAssistant`).
+- `OpenUrl`: opens a URL in a new tab (`@OpenUrl`).
 
 The following action steps are handled internally by the runtime (not dispatched to `onAction`):
 
-- `@Run(ref)` — executes a Mutation or re-fetches a Query
-- `@Set($var, value)` — changes a reactive `$variable`
-- `@Reset($var1, $var2)` — restores `$variables` to their declared defaults
+- `@Run(ref)`: executes a Mutation or re-fetches a Query
+- `@Set($var, value)`: changes a reactive `$variable`
+- `@Reset($var1, $var2)`: restores `$variables` to their declared defaults
 
 In openui-lang, actions are composed with `Action([...])`:
 
@@ -64,8 +64,8 @@ See [Reactive State](/docs/openui-lang/reactive-state) for `$variables` and [Que
 
 When `inlineMode` is enabled in the prompt config, the LLM can respond with either:
 
-- **Code** (fenced in triple backticks) — for creating or changing the UI
-- **Text only** — for answering questions without modifying the UI
+- **Code** (fenced in triple backticks), for creating or changing the UI
+- **Text only**, for answering questions without modifying the UI
 
 The parser extracts code from fences automatically. Text outside fences is shown as chat.
 
@@ -85,7 +85,7 @@ const MyButton = defineComponent({
 });
 ```
 
-`triggerAction(userMessage, formName?, action?)` — the second and third arguments are optional.
+`triggerAction(userMessage, formName?, action?)` accepts optional second and third arguments.
 
 ---
 
@@ -144,7 +144,7 @@ Use `onStateUpdate` to persist field state (e.g. to a message in your thread sto
 />
 ```
 
-`onStateUpdate` fires on every field change. The state format is opaque — persist and hydrate it as-is.
+`onStateUpdate` fires on every field change. The state format is opaque, so persist and hydrate it as-is.
 
 ### Field hooks
 
@@ -178,14 +178,3 @@ interface FormValidationContextValue {
 Built-in validators include `required`, `minLength`, `maxLength`, `min`, `max`, `pattern`, and `email`. Custom validators can be added via `builtInValidators`.
 
 ---
-
-## Next Steps
-
-<Cards>
-  <Card title="Renderer" href="/docs/openui-lang/renderer">
-    Full Renderer props reference.
-  </Card>
-  <Card title="API Reference" href="/docs/api-reference/react-lang">
-    Complete react-lang API.
-  </Card>
-</Cards>

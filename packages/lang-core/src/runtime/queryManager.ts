@@ -10,18 +10,13 @@ import { ToolNotFoundError } from "./toolProvider";
  *
  * @example
  * ```ts
- * // MCP
- * const tp = await connectMcp({ url: "https://api.com/mcp" });
- *
  * // Function map (Renderer normalizes this automatically)
  * <Renderer toolProvider={{
  *   get_users: (args) => fetch(`/api/users`).then(r => r.json()),
  * }} />
  *
- * // Direct implementation
- * const tp: ToolProvider = {
- *   callTool: async (name, args) => ({ items: [{ id: 1, name: "Test" }] }),
- * };
+ * // MCP client (Renderer wraps extractToolResult automatically)
+ * <Renderer toolProvider={mcpClient} />
  * ```
  */
 export interface ToolProvider {
@@ -468,6 +463,9 @@ export function createQueryManager(toolProvider: ToolProvider | null): QueryMana
     if (disposed || !toolProvider) return false;
     const m = mutations.get(statementId);
     if (!m) return false;
+
+    // Reject concurrent calls on the same mutation — prevents double-submit
+    if (m.result.status === "loading") return false;
 
     const gen = generation;
 

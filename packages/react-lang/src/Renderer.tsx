@@ -1,11 +1,12 @@
 import type {
   ActionEvent,
   ElementNode,
+  McpClientLike,
   OpenUIError,
   ParseResult,
   ToolProvider,
 } from "@openuidev/lang-core";
-import { ToolNotFoundError } from "@openuidev/lang-core";
+import { ToolNotFoundError, extractToolResult } from "@openuidev/lang-core";
 import React, { Component, Fragment, useEffect, useInsertionEffect, useRef } from "react";
 import { OpenUIContext, useOpenUI, useRenderNode } from "./context";
 import { useOpenUIState } from "./hooks/useOpenUIState";
@@ -33,10 +34,14 @@ export interface RendererProps {
   initialState?: Record<string, any>;
   /** Called whenever the parse result changes. */
   onParseResult?: (result: ParseResult | null) => void;
-  /** ToolProvider for Query()/Mutation() — accepts ToolProvider object, function map, or null. */
+  /**
+   * Tool provider for Query()/Mutation() calls.
+   * - Function map: `{ tool_name: async (args) => result }` — simplest option
+   * - MCP client: any object with `callTool({ name, arguments })` (e.g. from @modelcontextprotocol/sdk)
+   */
   toolProvider?:
-    | ToolProvider
     | Record<string, (args: Record<string, unknown>) => Promise<unknown>>
+    | McpClientLike
     | null;
   /** Custom loading indicator shown while queries are fetching. Defaults to a spinner. */
   queryLoader?: React.ReactNode;
@@ -53,6 +58,8 @@ export interface RendererProps {
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
+  componentName?: string;
+  onError?: (error: OpenUIError) => void;
 }
 
 interface ErrorBoundaryState {
@@ -92,8 +99,14 @@ class ElementErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    console.error("[openui] Component render error:", error, info);
+  componentDidCatch(error: Error): void {
+    const name = this.props.componentName ?? "Unknown";
+    this.props.onError?.({
+      source: "runtime",
+      code: "render-error",
+      component: name,
+      message: `Component ${name} render failed: ${error.message}`,
+    });
   }
 
   render() {
@@ -134,13 +147,13 @@ function renderDeep(value: unknown): React.ReactNode {
  * Renders a single ElementNode.
  */
 function RenderNode({ node }: { node: ElementNode }) {
-  const { library } = useOpenUI();
+  const { library, reportError } = useOpenUI();
   const Comp = library.components[node.typeName]?.component;
 
   if (!Comp) return null;
 
   return (
-    <ElementErrorBoundary>
+    <ElementErrorBoundary componentName={node.typeName} onError={reportError}>
       <RenderNodeInner el={node} Comp={Comp} />
     </ElementErrorBoundary>
   );
@@ -215,9 +228,15 @@ export function Renderer({
     async callTool(toolName: string, args: Record<string, unknown>): Promise<unknown> {
       const current = toolProviderInputRef.current ?? null;
       if (current == null) throw new Error("[openui] toolProvider is null");
-      if (typeof (current as any).callTool === "function") {
-        return (current as ToolProvider).callTool(toolName, args);
+      // MCP client — has callTool({ name, arguments }) returning MCP envelope
+      if (typeof (current as McpClientLike).callTool === "function") {
+        const result = await (current as McpClientLike).callTool({
+          name: toolName,
+          arguments: args,
+        });
+        return extractToolResult(result);
       }
+      // Function map — plain object of async functions
       const map = current as Record<string, (a: Record<string, unknown>) => Promise<unknown>>;
       const fn = map[toolName];
       if (!fn) throw new ToolNotFoundError(toolName, Object.keys(map));

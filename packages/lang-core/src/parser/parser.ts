@@ -337,31 +337,33 @@ export function stripFences(input: string): string {
   return input;
 }
 
-/** Strip // and # line comments outside of strings. */
+/** Strip // and # line comments outside of strings (handles both " and ' delimiters). */
 function stripComments(input: string): string {
   return input
     .split("\n")
     .map((line) => {
-      let inStr = false;
+      let inStr: false | '"' | "'" = false;
       for (let i = 0; i < line.length; i++) {
-        if (line[i] === '"') {
-          let backslashes = 0;
-          let bi = i - 1;
-          while (bi >= 0 && line[bi] === "\\") {
-            backslashes++;
-            bi--;
+        const c = line[i];
+        if (inStr) {
+          if (c === "\\" && i + 1 < line.length) {
+            i++; // skip escaped char
+            continue;
           }
-          if (backslashes % 2 === 0) inStr = !inStr;
+          if (c === inStr) inStr = false;
+          continue;
         }
-        if (!inStr) {
-          // // style comments
-          if (line[i] === "/" && line[i + 1] === "/") {
-            return line.substring(0, i).trimEnd();
-          }
-          // # style comments (Python/YAML style — LLMs sometimes use these)
-          if (line[i] === "#") {
-            return line.substring(0, i).trimEnd();
-          }
+        if (c === '"' || c === "'") {
+          inStr = c;
+          continue;
+        }
+        // // style comments
+        if (c === "/" && line[i + 1] === "/") {
+          return line.substring(0, i).trimEnd();
+        }
+        // # style comments (Python/YAML style — LLMs sometimes use these)
+        if (c === "#") {
+          return line.substring(0, i).trimEnd();
         }
       }
       return line;
@@ -394,11 +396,6 @@ export function parse(input: string, cat?: ParamMap, rootName?: string): ParseRe
   for (const s of stmts) {
     const expr = parseExpression(s.tokens);
     const stmt = classifyStatement(s, expr);
-    if (stmtMap.has(s.id)) {
-      console.warn(
-        `[openui parse] Duplicate statement ID "${s.id}" — later definition overwrites earlier one.`,
-      );
-    }
     stmtMap.set(s.id, stmt);
     if (!firstId) firstId = s.id;
   }
@@ -442,7 +439,7 @@ export function createStreamParser(cat?: ParamMap, rootName?: string): StreamPar
   function scanNewCompleted(): number {
     let depth = 0,
       ternaryDepth = 0,
-      inStr = false,
+      inStr: false | '"' | "'" = false,
       esc = false;
     let stmtStart = completedEnd;
 
@@ -456,11 +453,14 @@ export function createStreamParser(cat?: ParamMap, rootName?: string): StreamPar
         esc = true;
         continue;
       }
-      if (c === '"') {
-        inStr = !inStr;
+      if (inStr) {
+        if (c === inStr) inStr = false;
         continue;
       }
-      if (inStr) continue;
+      if (c === '"' || c === "'") {
+        inStr = c;
+        continue;
+      }
 
       if (c === "(" || c === "[" || c === "{") depth++;
       else if (c === ")" || c === "]" || c === "}") depth = Math.max(0, depth - 1);

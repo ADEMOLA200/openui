@@ -95,12 +95,20 @@ export function useOpenUIState(
   const sp = useMemo(() => createStreamingParser(library.toJSONSchema(), library.root), [library]);
 
   // ─── Parse result ───
+  const parseExceptionRef = useRef<OpenUIError | null>(null);
   const result = useMemo<ParseResult | null>(() => {
+    parseExceptionRef.current = null;
     if (!response) return null;
     try {
       return sp.set(response);
     } catch (e) {
-      console.error("[openui] Parse error:", e);
+      const msg = e instanceof Error ? e.message : String(e);
+      parseExceptionRef.current = {
+        source: "parser",
+        code: "parse-exception",
+        message: `Parser crashed: ${msg}`,
+        hint: "The response may contain syntax the parser cannot handle",
+      };
       return null;
     }
   }, [sp, response]);
@@ -375,6 +383,12 @@ export function useOpenUIState(
     [queryManager, evaluationContext, getFormPayload, store],
   );
 
+  // ─── reportError (for error boundary) ───
+  const renderErrorsRef = useRef<OpenUIError[]>([]);
+  const reportError = useCallback((error: OpenUIError) => {
+    renderErrorsRef.current.push(error);
+  }, []);
+
   // ─── Context value ───
   const contextValue = useMemo<OpenUIContextValue>(
     () => ({
@@ -386,6 +400,7 @@ export function useOpenUIState(
       setFieldValue,
       store,
       evaluationContext,
+      reportError,
     }),
     [
       library,
@@ -396,26 +411,38 @@ export function useOpenUIState(
       setFieldValue,
       store,
       evaluationContext,
+      reportError,
     ],
   );
 
   // ─── Evaluate props ───
+  const runtimeErrorsRef = useRef<OpenUIError[]>([]);
   const evalContext = useMemo<EvalContext>(
     () => ({
       ctx: evaluationContext,
       library,
       store,
+      errors: runtimeErrorsRef.current,
     }),
     [evaluationContext, library, store],
   );
 
   const evaluatedResult = useMemo<ParseResult | null>(() => {
     if (!result?.root) return result;
+    // Clear previous runtime errors before each evaluation pass
+    runtimeErrorsRef.current = [];
+    evalContext.errors = runtimeErrorsRef.current;
     try {
       const evaluatedRoot = evaluateElementProps(result.root, evalContext);
       return { ...result, root: evaluatedRoot };
     } catch (e) {
-      console.error("[openui] Prop evaluation error:", e);
+      // Safety net — per-prop catch in evaluateElementProps handles most cases
+      const msg = e instanceof Error ? e.message : String(e);
+      runtimeErrorsRef.current.push({
+        source: "runtime",
+        code: "runtime-error",
+        message: `Prop evaluation failed: ${msg}`,
+      });
       return result;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- storeSnapshot/querySnapshot are reactive triggers
@@ -437,15 +464,20 @@ export function useOpenUIState(
     }
     const errors: OpenUIError[] = [];
 
+    // Parser exception (parser itself crashed)
+    if (parseExceptionRef.current) {
+      errors.push(parseExceptionRef.current);
+    }
+
     // Parse failure — response exists but produced no renderable root
-    if (response && !result?.root) {
+    if (response && !result?.root && !parseExceptionRef.current) {
       errors.push({
         source: "parser",
         code: "parse-failed",
         message: result
           ? "Code parsed but produced no renderable root component"
           : "Response could not be parsed as valid openui-lang",
-        hint: "The entire response must be valid openui-lang code starting with root = RootComponent(...)",
+        hint: `The entire response must be valid openui-lang code starting with root = ${library.root ?? "Root"}(...)`,
       });
     }
 
@@ -474,6 +506,17 @@ export function useOpenUIState(
       }
     }
 
+    // Runtime eval errors (collected per-prop by evaluateElementProps)
+    for (const re of runtimeErrorsRef.current) {
+      errors.push(re);
+    }
+
+    // Render errors (collected by error boundary via reportError)
+    for (const re of renderErrorsRef.current) {
+      errors.push(re);
+    }
+    renderErrorsRef.current = [];
+
     // Query/mutation tool errors
     const qErrors = querySnapshot.__openui_errors ?? [];
     for (const qe of qErrors) {
@@ -492,8 +535,15 @@ export function useOpenUIState(
     if (key === lastErrorKeyRef.current) return;
     lastErrorKeyRef.current = key;
 
-    propsRef.current.onError?.(errors);
-  }, [isStreaming, response, result, querySnapshot, library]);
+    // Fire onError or fall back to console.warn
+    if (propsRef.current.onError) {
+      propsRef.current.onError(errors);
+    } else if (errors.length > 0) {
+      for (const e of errors) {
+        console.warn(`[openui] ${e.source}/${e.code}: ${e.message}`);
+      }
+    }
+  }, [isStreaming, response, result, evaluatedResult, querySnapshot, library]);
 
   return { result: evaluatedResult, parseResult: result, contextValue, isQueryLoading };
 }

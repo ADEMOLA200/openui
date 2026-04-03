@@ -1,4 +1,4 @@
-import type { ActionPlan, EvaluationContext, Store } from "@openuidev/lang-core";
+import type { ActionPlan, EvaluationContext, OpenUIError, Store } from "@openuidev/lang-core";
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect } from "react";
 import type { Library } from "./library";
@@ -54,6 +54,9 @@ export interface OpenUIContextValue {
 
   /** AST evaluation context used by runtime expression evaluation. */
   evaluationContext: EvaluationContext;
+
+  /** Report a structured error (used internally by error boundary). */
+  reportError?: (error: OpenUIError) => void;
 }
 
 export const OpenUIContext = createContext<OpenUIContextValue | null>(null);

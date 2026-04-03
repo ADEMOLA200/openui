@@ -29,7 +29,7 @@ export {
 export type { BuiltinDef } from "./parser/builtins";
 export { mergeStatements } from "./parser/merge";
 export { generatePrompt } from "./parser/prompt";
-export type { ComponentPromptSpec, McpToolSpec, PromptSpec } from "./parser/prompt";
+export type { ComponentPromptSpec, PromptSpec, ToolSpec } from "./parser/prompt";
 export { BuiltinActionType } from "./parser/types";
 export type {
   ActionEvent,
@@ -53,8 +53,8 @@ export { evaluateElementProps } from "./runtime/evaluate-tree";
 export type { EvalContext } from "./runtime/evaluate-tree";
 export { evaluate, isReactiveAssign, stripReactiveAssign } from "./runtime/evaluator";
 export type { EvaluationContext, ReactiveAssign } from "./runtime/evaluator";
-export { connectMcp } from "./runtime/mcp";
-export type { McpClientLike, McpConnection, McpConnectionConfig, McpTool } from "./runtime/mcp";
+export { extractToolResult } from "./runtime/mcp";
+export type { McpClientLike, McpTool } from "./runtime/mcp";
 export { createQueryManager } from "./runtime/queryManager";
 export type {
   MutationNode,

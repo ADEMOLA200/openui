@@ -32,7 +32,7 @@ export { createParser, createStreamingParser } from "@openuidev/lang-core";
 
 // Standalone prompt generation (no Zod deps — usable on backend)
 export { generatePrompt } from "@openuidev/lang-core";
-export type { ComponentPromptSpec, McpToolSpec, PromptSpec } from "@openuidev/lang-core";
+export type { ComponentPromptSpec, PromptSpec, ToolSpec } from "@openuidev/lang-core";
 
 // openui-lang edit/merge
 export { mergeStatements } from "@openuidev/lang-core";
@@ -50,12 +50,10 @@ export {
 } from "./context";
 
 // Runtime — reactive bindings, store, evaluator, query manager, field binding
-export { ToolNotFoundError, connectMcp, isReactiveAssign } from "@openuidev/lang-core";
+export { ToolNotFoundError, extractToolResult, isReactiveAssign } from "@openuidev/lang-core";
 export type {
   EvaluationContext,
   McpClientLike,
-  McpConnection,
-  McpConnectionConfig,
   McpTool,
   ReactiveAssign,
   StateField,
