@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { generatePrompt } from "./parser/prompt";
+import { generatePrompt } from "./parser/prompt.js";
 
 // ─── Sub-component type ──────────────────────────────────────────────────────
 

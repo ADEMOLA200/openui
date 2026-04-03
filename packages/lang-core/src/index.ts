@@ -1,5 +1,5 @@
 // ── Library (framework-generic) ──
-export { createLibrary, defineComponent } from "./library";
+export { createLibrary, defineComponent } from "./library.js";
 export type {
   ComponentGroup,
   ComponentRenderProps,
@@ -8,15 +8,15 @@ export type {
   LibraryDefinition,
   PromptOptions,
   SubComponentOf,
-} from "./library";
+} from "./library.js";
 
 // ── Parser ──
-export { createParser, createStreamingParser, parse } from "./parser";
-export type { LibraryJSONSchema, Parser, StreamParser } from "./parser";
-export { generatePrompt } from "./parser/prompt";
-export { BuiltinActionType } from "./parser/types";
-export type { ActionEvent, ElementNode, ParseResult, ValidationErrorCode } from "./parser/types";
+export { createParser, createStreamingParser, parse } from "./parser/index.js";
+export type { LibraryJSONSchema, Parser, StreamParser } from "./parser/index.js";
+export { generatePrompt } from "./parser/prompt.js";
+export { BuiltinActionType } from "./parser/types.js";
+export type { ActionEvent, ElementNode, ParseResult, ValidationErrorCode } from "./parser/types.js";
 
 // ── Validation ──
-export { builtInValidators, parseRules, parseStructuredRules, validate } from "./utils/validation";
-export type { ParsedRule, ValidatorFn } from "./utils/validation";
+export { builtInValidators, parseRules, parseStructuredRules, validate } from "./utils/validation.js";
+export type { ParsedRule, ValidatorFn } from "./utils/validation.js";

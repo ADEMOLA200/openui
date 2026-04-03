@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { DefinedComponent, Library, PromptOptions } from "../library";
+import type { DefinedComponent, Library, PromptOptions } from "../library.js";
 
 const PREAMBLE = `You are an AI assistant that responds using openui-lang, a declarative UI language. Your ENTIRE response must be valid openui-lang code — no markdown, no explanations, just openui-lang.`;
 

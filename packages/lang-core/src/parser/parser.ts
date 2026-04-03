@@ -1,4 +1,4 @@
-import type { ParseResult } from "./types";
+import type { ParseResult } from "./types.js";
 
 /**
  * The JSON Schema document produced by `library.toJSONSchema()`.
