@@ -12,13 +12,9 @@ function createServer(): McpServer {
         description: tool.description,
         inputSchema: tool.inputSchema,
       },
-      async (args) => {
-        console.log(`[mcp] tool="${tool.name}" args=`, JSON.stringify(args));
-        const result = await tool.execute(args);
-        const text = JSON.stringify(result);
-        console.log(`[mcp] tool="${tool.name}" result length=${text.length}`);
-        return { content: [{ type: "text" as const, text }] };
-      },
+      async (args) => ({
+        content: [{ type: "text" as const, text: JSON.stringify(await tool.execute(args)) }],
+      }),
     );
   }
 

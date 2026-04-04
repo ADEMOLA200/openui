@@ -29,7 +29,7 @@ function TangentialAppContent() {
   const [showCopilot, setShowCopilot] = useState(false);
   const [toolProvider, setToolProvider] = useState<McpClientLike | null>(null);
   const clientRef = useRef<McpClientLike | null>(null);
-  const { pinnedDashboard, unpinDashboard } = useDashboardPin();
+  const { pinnedDashboards, unpinDashboard } = useDashboardPin();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -183,21 +183,28 @@ function TangentialAppContent() {
 
         {/* Issue list */}
         <div className="main-body">
-          {pinnedDashboard && (
-            <div className="pinned-dashboard">
-              <div className="pinned-dashboard-header">
-                <div className="pinned-dashboard-title">Pinned Dashboard</div>
-                <button className="pinned-dashboard-unpin" onClick={unpinDashboard}>
-                  Unpin
-                </button>
-              </div>
-              <ThemeProvider mode="dark">
-                <Renderer
-                  response={pinnedDashboard.code}
-                  library={openuiLibrary}
-                  toolProvider={toolProvider ?? undefined}
-                />
-              </ThemeProvider>
+          {pinnedDashboards.length > 0 && (
+            <div className="pinned-dashboards">
+              {pinnedDashboards.map((dashboard) => (
+                <div key={dashboard.messageId} className="pinned-dashboard">
+                  <div className="pinned-dashboard-header">
+                    <div className="pinned-dashboard-title">Pinned Dashboard</div>
+                    <button
+                      className="pinned-dashboard-unpin"
+                      onClick={() => unpinDashboard(dashboard.messageId)}
+                    >
+                      Unpin
+                    </button>
+                  </div>
+                  <ThemeProvider mode="dark">
+                    <Renderer
+                      response={dashboard.code}
+                      library={openuiLibrary}
+                      toolProvider={toolProvider ?? undefined}
+                    />
+                  </ThemeProvider>
+                </div>
+              ))}
             </div>
           )}
           {loading ? (

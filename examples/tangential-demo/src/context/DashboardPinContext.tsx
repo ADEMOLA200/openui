@@ -8,31 +8,36 @@ export interface PinnedDashboard {
 }
 
 interface DashboardPinContextValue {
-  pinnedDashboard: PinnedDashboard | null;
+  pinnedDashboards: PinnedDashboard[];
   pinDashboard: (code: string, messageId: string) => void;
-  unpinDashboard: () => void;
+  unpinDashboard: (messageId: string) => void;
+  isPinned: (messageId: string) => boolean;
 }
 
 const DashboardPinContext = createContext<DashboardPinContextValue | null>(null);
 
 export function DashboardPinProvider({ children }: { children: React.ReactNode }) {
-  const [pinnedDashboard, setPinnedDashboard] = useState<PinnedDashboard | null>(null);
+  const [pinnedDashboards, setPinnedDashboards] = useState<PinnedDashboard[]>([]);
 
   const pinDashboard = useCallback((code: string, messageId: string) => {
-    setPinnedDashboard({ code, messageId });
+    setPinnedDashboards((prev) => {
+      if (prev.some((d) => d.messageId === messageId)) return prev;
+      return [...prev, { code, messageId }];
+    });
   }, []);
 
-  const unpinDashboard = useCallback(() => {
-    setPinnedDashboard(null);
+  const unpinDashboard = useCallback((messageId: string) => {
+    setPinnedDashboards((prev) => prev.filter((d) => d.messageId !== messageId));
   }, []);
+
+  const isPinned = useCallback(
+    (messageId: string) => pinnedDashboards.some((d) => d.messageId === messageId),
+    [pinnedDashboards],
+  );
 
   const value = useMemo(
-    () => ({
-      pinnedDashboard,
-      pinDashboard,
-      unpinDashboard,
-    }),
-    [pinnedDashboard, pinDashboard, unpinDashboard],
+    () => ({ pinnedDashboards, pinDashboard, unpinDashboard, isPinned }),
+    [pinnedDashboards, pinDashboard, unpinDashboard, isPinned],
   );
 
   return <DashboardPinContext.Provider value={value}>{children}</DashboardPinContext.Provider>;

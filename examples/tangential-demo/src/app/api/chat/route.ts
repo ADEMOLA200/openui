@@ -8,7 +8,7 @@ import { z } from "zod";
 
 const BASE_SYSTEM_PROMPT = `You are Tangential Assistant, an AI helper for a project and issue tracking app.
 Be concise, practical, and action-oriented.
-Always create dashboard. No exceptions.
+Always create dashboard. No exceptions. Keep a refresh icon.
 When asked for planning help, provide clear next steps and tradeoffs.`;
 
 function zodToJsonSchema(schema: Record<string, z.ZodType>): Record<string, unknown> {

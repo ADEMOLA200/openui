@@ -62,7 +62,7 @@ export function DashboardAssistantMessage({
   const messages = useThread((state) => state.messages);
   const isRunning = useThread((state) => state.isRunning);
   const processMessage = useThread((state) => state.processMessage);
-  const { pinnedDashboard, pinDashboard, unpinDashboard } = useDashboardPin();
+  const { pinDashboard, unpinDashboard, isPinned: checkPinned } = useDashboardPin();
 
   const toolMessages = useMemo(() => {
     const result: ToolMessage[] = [];
@@ -90,7 +90,7 @@ export function DashboardAssistantMessage({
 
   const code = useMemo(() => extractCodeOnly(message.content ?? ""), [message.content]);
   const markdownText = useMemo(() => extractText(message.content ?? ""), [message.content]);
-  const isPinned = pinnedDashboard?.messageId === message.id;
+  const isPinned = checkPinned(message.id);
 
   const getToolName = (toolCallId: string) => {
     const toolCall = message.toolCalls?.find((entry) => entry.id === toolCallId);
@@ -100,7 +100,7 @@ export function DashboardAssistantMessage({
   const handlePinToggle = () => {
     if (!code) return;
     if (isPinned) {
-      unpinDashboard();
+      unpinDashboard(message.id);
       return;
     }
     pinDashboard(code, message.id);

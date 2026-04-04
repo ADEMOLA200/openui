@@ -92,6 +92,7 @@ export function updateIssue(
   id: string,
   input: Partial<Issue>,
 ): IssueWithRelations | undefined {
+  console.log("updateIssue", id, input);
   const idx = issues.findIndex((i) => i.id === id || i.identifier === id);
   if (idx === -1) return undefined;
 

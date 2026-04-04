@@ -725,8 +725,14 @@ a {
   color: #c4b5fd;
 }
 
+.pinned-dashboards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 12px;
+  padding: 12px 20px;
+}
+
 .pinned-dashboard {
-  margin: 12px 20px;
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
