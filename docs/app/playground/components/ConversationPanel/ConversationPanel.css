@@ -3,87 +3,88 @@
   flex-direction: column;
   width: 360px;
   min-width: 360px;
-  border-left: 1px solid var(--input-border);
-  background: var(--page-bg);
+  border-left: 1px solid var(--openui-border-default);
+  background: var(--openui-background);
 }
 
 .conv-header {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--input-border);
+  padding: var(--openui-space-m) var(--openui-space-m-l);
+  border-bottom: 1px solid var(--openui-border-default);
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
+  color: var(--openui-text-neutral-primary);
+  font-family: var(--openui-font-body);
 }
 
 .conv-messages {
   flex: 1;
   overflow: auto;
-  padding: 12px 16px;
+  padding: var(--openui-space-m) var(--openui-space-m-l);
 }
 
 .conv-msg {
-  margin-bottom: 12px;
+  margin-bottom: var(--openui-space-m);
 }
 
 /* User message */
 .conv-user-bubble {
-  background: var(--surface);
-  color: var(--text-primary);
-  padding: 8px 12px;
-  border-radius: 10px;
+  background: var(--openui-chat-user-response-bg);
+  color: var(--openui-chat-user-response-text);
+  padding: var(--openui-space-s) var(--openui-space-m);
+  border-radius: var(--openui-radius-l);
   font-size: 13px;
   line-height: 1.4;
   margin-left: 40px;
-  font-family: var(--font-sans);
+  box-shadow: var(--openui-shadow-s);
+  font-family: var(--openui-font-body);
 }
 
 /* Assistant message */
 .conv-assistant {
-  margin-right: 20px;
+  margin-right: var(--openui-space-xl);
 }
 
 .conv-assistant-bubble {
-  background: var(--surface);
-  border: 1px solid var(--input-border);
-  padding: 8px 12px;
-  border-radius: 10px;
+  background: var(--openui-chat-assistant-response-bg);
+  border: 1px solid var(--openui-border-default);
+  padding: var(--openui-space-s) var(--openui-space-m);
+  border-radius: var(--openui-radius-l);
   font-size: 13px;
   line-height: 1.5;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
+  color: var(--openui-chat-assistant-response-text);
+  font-family: var(--openui-font-body);
 }
 
 /* Tool call badges */
 .conv-tools-badge {
-  padding: 6px 10px;
-  border-radius: 8px;
-  margin-bottom: 6px;
+  padding: var(--openui-space-xs) var(--openui-space-s-m);
+  border-radius: var(--openui-radius-m);
+  margin-bottom: var(--openui-space-xs);
   font-size: 11px;
-  font-family: var(--font-sans);
+  font-family: var(--openui-font-body);
 }
 
 .conv-tools-runtime {
-  background: rgba(74, 222, 128, 0.08);
-  border: 1px solid rgba(74, 222, 128, 0.2);
+  background: var(--openui-success-background);
+  border: 1px solid var(--openui-border-success);
 }
 
 .conv-tools-live {
-  background: var(--surface);
-  border: 1px solid var(--input-border);
+  background: var(--openui-highlight-subtle);
+  border: 1px solid var(--openui-border-default);
 }
 
 .conv-tools-label {
-  color: #15803d;
+  color: var(--openui-text-success-primary);
   font-weight: 600;
   margin-bottom: 3px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--openui-space-2xs);
 }
 
 .conv-tools-label-text {
-  color: var(--text-secondary);
+  color: var(--openui-text-neutral-secondary);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -98,126 +99,141 @@
 }
 
 .conv-tool-chip {
-  padding: 1px 6px;
-  border-radius: 4px;
+  padding: 1px var(--openui-space-xs);
+  border-radius: var(--openui-radius-xs);
   font-size: 10px;
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
 }
 
 .conv-tool-done {
-  background: rgba(74, 222, 128, 0.12);
-  color: #166534;
+  background: var(--openui-success-background);
+  color: var(--openui-text-success-primary);
 }
 
 .conv-tool-pending {
-  background: rgba(250, 204, 21, 0.12);
-  color: #92400e;
+  background: var(--openui-alert-background);
+  color: var(--openui-text-alert-primary);
 }
 
 .conv-tool-error {
-  background: rgba(248, 113, 113, 0.12);
-  color: #991b1b;
+  background: var(--openui-danger-background);
+  color: var(--openui-text-danger-primary);
 }
 
 /* Code badge */
 .conv-code-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 8px;
+  gap: var(--openui-space-2xs);
+  padding: var(--openui-space-3xs) var(--openui-space-s);
+  border-radius: var(--openui-radius-m);
   font-size: 11px;
-  background: rgba(74, 222, 128, 0.1);
-  color: #059669;
-  margin-top: 4px;
-  font-family: var(--font-sans);
+  background: var(--openui-success-background);
+  color: var(--openui-text-success-primary);
+  margin-top: var(--openui-space-2xs);
+  font-family: var(--openui-font-body);
 }
 
 .conv-code-updating {
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
+  background: var(--openui-purple-background);
+  color: var(--openui-text-purple-primary);
 }
 
 /* Thinking state */
 .conv-thinking {
-  background: var(--surface);
-  border: 1px solid var(--input-border);
-  padding: 8px 12px;
-  border-radius: 10px;
+  background: var(--openui-chat-assistant-response-bg);
+  border: 1px solid var(--openui-border-default);
+  padding: var(--openui-space-s) var(--openui-space-m);
+  border-radius: var(--openui-radius-l);
   font-size: 13px;
-  color: #059669;
-  font-family: var(--font-sans);
+  color: var(--openui-text-neutral-secondary);
+  font-family: var(--openui-font-body);
 }
 
 .conv-empty {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--openui-text-neutral-tertiary);
   font-style: italic;
 }
 
 /* Input area */
 .conv-input-area {
-  padding: 12px 16px;
-  border-top: 1px solid var(--input-border);
+  padding: var(--openui-space-m) var(--openui-space-m-l);
+  border-top: 1px solid var(--openui-border-default);
+  background: var(--openui-foreground);
 }
 
 .conv-input-row {
   display: flex;
-  gap: 8px;
+  gap: var(--openui-space-s);
 }
 
 .conv-input {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
+  padding: var(--openui-space-s) var(--openui-space-m);
+  border: 1px solid var(--openui-border-default);
+  border-radius: var(--openui-radius-m);
   font-size: 13px;
   outline: none;
-  background: var(--input-bg);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  transition: border-color 0.15s;
+  background: var(--openui-sunk);
+  color: var(--openui-text-neutral-primary);
+  font-family: var(--openui-font-body);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
-.conv-input:focus {
-  border-color: var(--input-focus-ring);
+.conv-input:focus-visible {
+  border-color: var(--openui-border-interactive-emphasis);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--openui-border-accent-emphasis) 22%, transparent);
 }
 
-.conv-send-btn,
-.conv-stop-btn {
+.openui-icon-button.conv-send-btn,
+.openui-icon-button.conv-stop-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--openui-radius-m);
   cursor: pointer;
-  transition: background 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
-.conv-send-btn {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
+.openui-icon-button.conv-send-btn:focus-visible,
+.openui-icon-button.conv-stop-btn:focus-visible {
+  outline: 2px solid var(--openui-border-accent);
+  outline-offset: 2px;
 }
 
-.conv-send-btn:hover:not(:disabled) {
-  background: var(--btn-primary-hover);
+.openui-icon-button.conv-send-btn {
+  background: var(--openui-interactive-accent-default);
+  color: var(--openui-text-accent-primary);
 }
 
-.conv-send-btn:disabled {
+.openui-icon-button.conv-send-btn:hover:not(:disabled) {
+  background: var(--openui-interactive-accent-hover);
+}
+
+.openui-icon-button.conv-send-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.conv-stop-btn {
-  background: var(--surface);
-  color: var(--text-secondary);
-  border: 1px solid var(--input-border);
+.openui-icon-button.conv-stop-btn {
+  background: var(--openui-highlight-subtle);
+  color: var(--openui-text-neutral-secondary);
+  border: 1px solid var(--openui-border-default);
 }
 
-.conv-stop-btn:hover {
-  background: var(--surface-hover);
+.openui-icon-button.conv-stop-btn:hover:not(:disabled) {
+  background: var(--openui-highlight);
+  color: var(--openui-text-neutral-primary);
+  border-color: var(--openui-border-interactive);
 }
 
 @media (max-width: 768px) {
@@ -225,7 +241,7 @@
     width: 100%;
     min-width: 0;
     border-left: none;
-    border-top: 1px solid var(--input-border);
+    border-top: 1px solid var(--openui-border-default);
     max-height: 300px;
   }
 }

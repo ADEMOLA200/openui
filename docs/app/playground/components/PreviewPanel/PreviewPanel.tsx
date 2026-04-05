@@ -1,6 +1,6 @@
+import { IconButton, openuiLibrary, ThemeProvider } from "@openuidev/react-ui";
 import type { ActionEvent, ParseResult } from "@openuidev/react-lang";
 import { Renderer } from "@openuidev/react-lang";
-import { openuiLibrary, ThemeProvider } from "@openuidev/react-ui";
 import { Loader2, Maximize2, Monitor } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Modal } from "../Modal/Modal";
@@ -58,14 +58,15 @@ export function PreviewPanel({
             {isStreaming && <Loader2 size={14} className="preview-spinner" />}
           </div>
           <div className="panel-actions">
-            <button
+            <IconButton
               className="panel-icon-btn"
+              icon={<Maximize2 size={14} />}
+              variant="tertiary"
+              size="extra-small"
               onClick={() => setIsModalOpen(true)}
               title="Open fullscreen preview"
               aria-label="Open fullscreen preview"
-            >
-              <Maximize2 size={14} />
-            </button>
+            />
           </div>
         </div>
         <div className="preview-body">{previewContent}</div>

@@ -1,3 +1,4 @@
+.openui-icon-button.header-btn,
 .header-btn {
   display: flex;
   align-items: center;
@@ -17,6 +18,7 @@
   white-space: nowrap;
 }
 
+.openui-icon-button.header-btn:hover:not(:disabled),
 .header-btn:hover {
   background: var(--openui-highlight);
   color: var(--openui-text-neutral-primary);
@@ -26,6 +28,7 @@
   flex-shrink: 0;
 }
 
+.openui-icon-button.header-icon-btn,
 .header-icon-btn {
   padding: 6px;
   border-radius: 6px;

@@ -50,7 +50,7 @@
   color: var(--openui-text-neutral-secondary);
 }
 
-.catalog-panel-toggle {
+.openui-icon-button.catalog-panel-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,7 +67,7 @@
     color 0.15s;
 }
 
-.catalog-panel-toggle:hover {
+.openui-icon-button.catalog-panel-toggle:hover:not(:disabled) {
   background: var(--openui-highlight);
   color: var(--openui-text-neutral-primary);
 }
@@ -276,7 +276,7 @@
     display: none;
   }
 
-  .catalog-panel-toggle {
+  .openui-icon-button.catalog-panel-toggle {
     width: 28px;
     height: 28px;
   }

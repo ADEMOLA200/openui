@@ -1,267 +1,304 @@
 .gh-connect {
-  max-width: 680px;
-  margin: 48px auto;
-  padding: 0 20px;
+  --gh-chip-font: var(--openui-text-label-sm);
+  --gh-chip-font-heavy: var(--openui-text-label-sm-heavy);
+  width: min(100%, 1080px);
+  margin: 72px auto 0;
+  padding: 0 var(--openui-space-xl) 72px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 28px;
+  gap: var(--openui-space-s);
 }
 
 .gh-connect-hero {
+  max-width: 496px;
   text-align: center;
 }
 
-.gh-connect-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 12px;
-  border-radius: 14px;
-  background: var(--surface);
-  color: var(--text-primary);
+.gh-connect-form {
+  margin-top: var(--openui-space-3xl);
+}
+
+.gh-demo-section {
+  margin-top: var(--openui-space-m-l);
+}
+
+.gh-starters {
+  margin-top: var(--openui-space-3xl);
 }
 
 .gh-connect-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.03em;
-  font-family: var(--font-sans);
+  color: var(--openui-text-neutral-primary);
+  font-family: var(--openui-font-body);
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  text-wrap: balance;
 }
 
-.gh-connect-subtitle {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin: 6px 0 0;
-  font-family: var(--font-sans);
-}
-
-/* Input form */
-.gh-connect-form {
+.gh-connect-secondary {
   width: 100%;
-  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--openui-space-xl);
+  margin-top: var(--openui-space-3xl);
+}
+
+.gh-connect-secondary-title {
+  margin: var(--openui-space-xl) 0 0;
+  color: var(--openui-text-neutral-primary);
+  font-family: var(--openui-font-body);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.gh-connect-section {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--openui-space-m);
+}
+
+.gh-connect-form {
+  max-width: 520px;
+}
+
+.gh-section-label {
+  margin: 0;
+  font: var(--openui-text-label-sm);
+  color: var(--openui-text-neutral-secondary);
+  text-align: center;
+  text-wrap: balance;
 }
 
 .gh-input-row {
+  width: 100%;
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: var(--openui-space-s);
 }
 
 .gh-avatar-preview {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  border: 2px solid var(--input-border);
-  object-fit: cover;
+  border-radius: var(--openui-radius-full);
+  border: 1px solid var(--openui-border-default);
   flex-shrink: 0;
 }
 
 .gh-input {
   flex: 1;
-  padding: 10px 14px;
-  border: 1px solid var(--input-border);
-  border-radius: 10px;
+  min-width: 0;
+  padding: var(--openui-space-s-m) var(--openui-space-m);
+  border: 1px solid var(--openui-border-default);
+  border-radius: var(--openui-radius-l);
+  background: var(--openui-sunk);
+  color: var(--openui-text-neutral-primary);
+  font-family: var(--openui-font-body);
   font-size: 15px;
   outline: none;
-  background: var(--input-bg);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
   transition:
     border-color 0.15s,
-    box-shadow 0.15s;
+    box-shadow 0.15s,
+    background-color 0.15s;
 }
 
-.gh-input:focus {
-  border-color: var(--input-focus-ring);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+.gh-input::placeholder {
+  color: var(--openui-text-neutral-tertiary);
 }
 
-.gh-connect-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 10px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  transition: background 0.15s;
-  white-space: nowrap;
+.gh-input:focus-visible {
+  border-color: var(--openui-border-interactive-emphasis);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--openui-border-accent-emphasis) 22%, transparent);
 }
 
-.gh-connect-btn:hover:not(:disabled) {
-  background: var(--btn-primary-hover);
-}
-
-.gh-connect-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.gh-input-row > .openui-button-base:focus-visible,
+.openui-button-base.gh-demo-chip:focus-visible,
+.openui-button-base.gh-starter-chip:focus-visible {
+  outline: 2px solid var(--openui-border-accent);
+  outline-offset: 2px;
 }
 
 .gh-error {
-  margin-top: 6px;
-  font-size: 12px;
-  color: #f87171;
-  font-family: var(--font-sans);
+  margin-top: calc(var(--openui-space-xs) * -1);
+  color: var(--openui-text-danger-primary);
+  font: var(--openui-text-label-sm);
 }
 
-/* Demo user section */
-.gh-demo-section {
+.gh-chip-scroll {
   width: 100%;
-  text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.gh-demo-label {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  margin-bottom: 10px;
-  font-family: var(--font-sans);
+.gh-chip-scroll::-webkit-scrollbar {
+  display: none;
 }
 
-.gh-demo-users {
+.gh-demo-users,
+.gh-starters-inline,
+.gh-generic-chips {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
+  gap: var(--openui-space-s);
+  width: max-content;
+  min-width: 100%;
 }
 
-.gh-demo-chip {
-  display: flex;
+.openui-button-base.gh-demo-chip,
+.openui-button-base.gh-starter-chip {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border: 1px solid var(--chip-border);
-  border-radius: 10px;
-  background: var(--chip-bg);
-  color: var(--text-primary);
-  font-size: 13px;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  transition: all 0.15s;
+  gap: var(--openui-space-s);
+  border: 1px solid var(--openui-border-default);
+  border-radius: var(--openui-radius-full);
+  background: var(--openui-highlight-subtle);
+  box-shadow: none;
+  flex-shrink: 0;
+  font: var(--gh-chip-font);
+  letter-spacing: var(--openui-text-label-sm-letter-spacing);
+  padding: var(--openui-space-s-m) var(--openui-space-m-l);
 }
 
-.gh-demo-chip:hover {
-  background: var(--chip-hover);
-  border-color: var(--text-tertiary);
-  transform: translateY(-1px);
+.openui-button-base.gh-demo-chip {
+  min-width: 0;
+}
+
+.openui-button-base.gh-demo-chip:hover:not(:disabled),
+.openui-button-base.gh-demo-chip:active:not(:disabled) {
+  background: var(--openui-highlight);
+  border-color: var(--openui-border-interactive);
+}
+
+.openui-button-base.gh-demo-chip-selected,
+.openui-button-base.gh-demo-chip-selected:hover:not(:disabled),
+.openui-button-base.gh-demo-chip-selected:active:not(:disabled) {
+  background: var(--openui-highlight);
+  border-color: var(--openui-border-interactive-selected);
 }
 
 .gh-demo-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--openui-radius-full);
   flex-shrink: 0;
 }
 
-.gh-demo-name {
-  font-weight: 500;
+.gh-demo-copy {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--openui-space-xs);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.gh-demo-name,
+.gh-starter-chip-label {
+  color: var(--openui-text-neutral-primary);
+  font: var(--gh-chip-font-heavy);
+  letter-spacing: var(--openui-text-label-sm-heavy-letter-spacing);
 }
 
 .gh-demo-handle {
-  color: var(--text-tertiary);
-  font-size: 12px;
+  color: var(--openui-text-neutral-tertiary);
+  font: var(--gh-chip-font);
+  letter-spacing: var(--openui-text-label-sm-letter-spacing);
 }
 
-/* Starter cards */
-.gh-starters {
-  width: 100%;
+.openui-button-base.gh-starter-chip:hover:not(:disabled),
+.openui-button-base.gh-starter-chip:active:not(:disabled) {
+  background: var(--openui-highlight);
+  border-color: var(--openui-border-interactive);
 }
 
-.gh-starters-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 10px;
-  text-align: center;
-  font-family: var(--font-sans);
-}
-
-.gh-starters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-}
-
-.gh-starter-card {
-  padding: 14px;
-  border: 1px solid var(--input-border);
-  border-radius: 10px;
-  background: var(--page-bg);
-  cursor: pointer;
-  font-family: var(--font-sans);
-  text-align: left;
-  transition: all 0.15s;
-  line-height: 1.4;
-}
-
-.gh-starter-card:hover {
-  border-color: var(--text-primary);
-  transform: translateY(-1px);
+.openui-button-base.gh-starter-chip-selected,
+.openui-button-base.gh-starter-chip-selected:hover:not(:disabled),
+.openui-button-base.gh-starter-chip-selected:active:not(:disabled) {
+  background: var(--openui-highlight);
+  border-color: var(--openui-border-interactive-selected);
 }
 
 .gh-starter-icon {
-  font-size: 18px;
+  font-size: 14px;
+  line-height: 1;
 }
 
-.gh-starter-label {
-  font-weight: 600;
-  font-size: 13px;
-  margin-top: 4px;
-  color: var(--text-primary);
-}
-
-.gh-starter-desc {
-  color: var(--text-tertiary);
-  font-size: 11px;
-  margin-top: 3px;
-}
-
-/* Divider */
-.gh-divider {
-  width: 100%;
+.gh-start-actions {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--text-tertiary);
-  font-size: 12px;
-  font-family: var(--font-sans);
-}
-
-.gh-divider::before,
-.gh-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--input-border);
-}
-
-/* Generic chips row */
-.gh-generic-chips {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
+  gap: var(--openui-space-s);
+  width: 100%;
+  margin-top: var(--openui-space-3xl);
+}
+
+.openui-button-base.gh-generic-chip {
+  border-radius: var(--openui-radius-l);
+  gap: var(--openui-space-xs);
+}
+
+.openui-button-base.gh-generic-chip .openui-button-icon-right,
+.openui-button-base.gh-generic-chip svg {
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
   .gh-connect {
-    margin: 24px auto;
-    gap: 20px;
+    margin-top: var(--openui-space-2xl);
+    padding: 0 var(--openui-space-m-l) var(--openui-space-2xl);
   }
 
   .gh-connect-title {
-    font-size: 22px;
+    font-size: 30px;
   }
 
-  .gh-starters-grid {
-    grid-template-columns: 1fr 1fr;
+  .gh-connect-secondary-title {
+    font-size: 26px;
+  }
+
+  .gh-input-row {
+    gap: var(--openui-space-xs);
+  }
+
+  .gh-demo-section {
+    margin-top: var(--openui-space-m);
+  }
+
+  .gh-starters {
+    margin-top: var(--openui-space-m-l);
+  }
+
+  .gh-connect-secondary {
+    margin-top: var(--openui-space-xl);
+    gap: var(--openui-space-l);
+  }
+
+  .gh-chip-scroll {
+    overflow: visible;
+  }
+
+  .gh-connect-title {
+    text-wrap: pretty;
+  }
+
+  .gh-demo-users,
+  .gh-starters-inline,
+  .gh-generic-chips {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
   }
 }

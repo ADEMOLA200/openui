@@ -1,4 +1,5 @@
 import { SiteMarketingHeader } from "@/components/site-marketing-header";
+import { IconButton } from "@openuidev/react-ui";
 import { KeyRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { Theme } from "../../constants";
@@ -19,14 +20,15 @@ export function Header({
 }: HeaderProps) {
   const themeLabel = { system: "System", light: "Light", dark: "Dark" }[theme];
   const extraActions: ReactNode = hasApiKey ? (
-    <button
+    <IconButton
       className="header-btn header-icon-btn"
+      icon={<KeyRound size={15} />}
+      variant="tertiary"
+      size="extra-small"
       onClick={onChangeKey}
       title="Change API Key"
       aria-label="Change API Key"
-    >
-      <KeyRound size={15} />
-    </button>
+    />
   ) : null;
 
   return (

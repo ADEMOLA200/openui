@@ -1,6 +1,7 @@
 "use client";
 
 import { mergeStatements } from "@openuidev/react-lang";
+import { Button } from "@openuidev/react-ui";
 import { Code2 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -419,9 +420,14 @@ export default function PlaygroundPage() {
                     className="gh-connected-avatar"
                   />
                   <span>@{githubUsername}</span>
-                  <button className="gh-connected-change" onClick={handleDisconnect}>
+                  <Button
+                    className="gh-connected-change"
+                    variant="tertiary"
+                    size="extra-small"
+                    onClick={handleDisconnect}
+                  >
                     Change
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -433,20 +439,18 @@ export default function PlaygroundPage() {
                       <img
                         src={`https://github.com/${githubUsername}.png?size=32`}
                         alt=""
-                        style={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: "50%",
-                        }}
+                        className="gh-welcome-avatar-image"
                       />
                     </span>
                     Connected as <strong>@{githubUsername}</strong>. What do you want to build?
                   </div>
-                  <div className="gh-starters-grid" style={{ maxWidth: 600 }}>
+                  <div className="gh-starters-grid gh-starters-grid-compact">
                     {GITHUB_STARTERS.map((s) => (
-                      <button
+                      <Button
                         key={s.prompt}
                         className="gh-starter-card"
+                        variant="tertiary"
+                        size="large"
                         onClick={() => send(s.prompt)}
                         disabled={isStreaming}
                       >
@@ -455,7 +459,7 @@ export default function PlaygroundPage() {
                         <div className="gh-starter-desc">
                           {s.prompt.length > 60 ? s.prompt.slice(0, 60) + "..." : s.prompt}
                         </div>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -467,13 +471,15 @@ export default function PlaygroundPage() {
                   {elapsed && (
                     <span className="dashboard-elapsed">{(elapsed / 1000).toFixed(1)}s</span>
                   )}
-                  <button
+                  <Button
                     className="dashboard-source-toggle"
+                    variant="tertiary"
+                    size="extra-small"
                     onClick={() => setShowSource(!showSource)}
                   >
                     <Code2 size={12} />
                     {showSource ? "Hide code" : "View code"}
-                  </button>
+                  </Button>
                 </div>
               )}
 

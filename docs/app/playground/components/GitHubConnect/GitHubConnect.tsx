@@ -1,6 +1,7 @@
 "use client";
 
-import { Github } from "lucide-react";
+import { Button } from "@openuidev/react-ui";
+import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GITHUB_STARTERS, STARTER_PROMPTS } from "../../constants";
 import "./GitHubConnect.css";
@@ -19,13 +20,14 @@ const DEMO_USERS = [
 ];
 
 export function GitHubConnect({
-  onConnect,
+  onConnect: _onConnect,
   onConnectAndPrompt,
   onGenericPrompt,
 }: GitHubConnectProps) {
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [selectedGithubPrompt, setSelectedGithubPrompt] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -33,7 +35,6 @@ export function GitHubConnect({
     inputRef.current?.focus();
   }, []);
 
-  // Debounced avatar preview
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
@@ -48,7 +49,7 @@ export function GitHubConnect({
       img.onload = () => setAvatarUrl(url);
       img.onerror = () => setAvatarUrl(null);
       img.src = url;
-    }, 400);
+    }, 250);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -73,25 +74,48 @@ export function GitHubConnect({
     return true;
   }, []);
 
-  const handleConnect = () => {
-    if (validate(username)) {
-      onConnect(username.trim());
+  const preventMouseSelection = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  }, []);
+
+  const handlePopularDeveloperSelect = useCallback((nextUsername: string) => {
+    setUsername(nextUsername);
+    setError("");
+  }, []);
+
+  const trimmedUsername = username.trim();
+  const hasValidUsername =
+    trimmedUsername.length > 0 &&
+    trimmedUsername.length <= 39 &&
+    /^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(trimmedUsername);
+  const canStart = selectedGithubPrompt !== null && hasValidUsername;
+  const selectedDemoUsername =
+    DEMO_USERS.find((user) => user.username === trimmedUsername)?.username ?? null;
+  const canReset = Boolean(trimmedUsername || selectedGithubPrompt || error);
+
+  const handleReset = useCallback(() => {
+    setUsername("");
+    setAvatarUrl(null);
+    setError("");
+    setSelectedGithubPrompt(null);
+    inputRef.current?.focus();
+  }, []);
+
+  const handleStartGenerating = () => {
+    if (selectedGithubPrompt) {
+      if (!validate(username)) return;
+      onConnectAndPrompt(trimmedUsername, selectedGithubPrompt);
     }
   };
 
   return (
     <div className="gh-connect">
       <div className="gh-connect-hero">
-        <div className="gh-connect-icon">
-          <Github size={32} />
-        </div>
-        <h1 className="gh-connect-title">Explore Your GitHub</h1>
-        <p className="gh-connect-subtitle">
-          Connect your profile to build live, interactive dashboards with real data
-        </p>
+        <h1 className="gh-connect-title">Try a live &amp; interactive dashboard of GitHub</h1>
       </div>
 
-      <div className="gh-connect-form">
+      <div className="gh-connect-section gh-connect-form">
+        <div className="gh-section-label">Enter your GitHub username</div>
         <div className="gh-input-row">
           {avatarUrl && <img src={avatarUrl} alt="" className="gh-avatar-preview" />}
           <input
@@ -103,65 +127,98 @@ export function GitHubConnect({
               setError("");
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleConnect();
+              if (e.key === "Enter" && canStart) handleStartGenerating();
             }}
-            placeholder="Enter your GitHub username"
+            placeholder="Type here"
           />
-          <button className="gh-connect-btn" onClick={handleConnect} disabled={!username.trim()}>
-            Connect
-          </button>
         </div>
         {error && <div className="gh-error">{error}</div>}
       </div>
 
-      {/* Demo users */}
-      <div className="gh-demo-section">
-        <div className="gh-demo-label">or try with a popular developer</div>
-        <div className="gh-demo-users">
-          {DEMO_USERS.map((u) => (
-            <button key={u.username} className="gh-demo-chip" onClick={() => onConnect(u.username)}>
-              <img
-                src={`https://github.com/${u.username}.png?size=24`}
-                alt=""
-                className="gh-demo-avatar"
-              />
-              <span className="gh-demo-name">{u.label}</span>
-              <span className="gh-demo-handle">@{u.username}</span>
-            </button>
-          ))}
+      <div className="gh-connect-section gh-demo-section">
+        <div className="gh-section-label">or try with any of these popular developers</div>
+        <div className="gh-chip-scroll">
+          <div className="gh-demo-users">
+            {DEMO_USERS.map((u) => (
+              <Button
+                key={u.username}
+                className={`gh-demo-chip ${selectedDemoUsername === u.username ? "gh-demo-chip-selected" : ""}`}
+                variant="tertiary"
+                size="small"
+                onMouseDown={preventMouseSelection}
+                onClick={() => handlePopularDeveloperSelect(u.username)}
+              >
+                <img
+                  src={`https://github.com/${u.username}.png?size=24`}
+                  alt=""
+                  className="gh-demo-avatar"
+                />
+                <span className="gh-demo-copy">
+                  <span className="gh-demo-name">{u.label}</span>
+                  <span className="gh-demo-handle">@{u.username}</span>
+                </span>
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* GitHub starter prompts — connect + prompt in one click */}
-      <div className="gh-starters">
-        <div className="gh-starters-label">Quick start with @torvalds</div>
-        <div className="gh-starters-grid">
-          {GITHUB_STARTERS.map((s) => (
-            <button
-              key={s.prompt}
-              className="gh-starter-card"
-              onClick={() => onConnectAndPrompt("torvalds", s.prompt)}
-            >
-              <span className="gh-starter-icon">{s.icon}</span>
-              <div className="gh-starter-label">{s.label}</div>
-              <div className="gh-starter-desc">
-                {s.prompt.length > 60 ? s.prompt.slice(0, 60) + "..." : s.prompt}
-              </div>
-            </button>
-          ))}
+      <div className="gh-connect-section gh-starters">
+        <div className="gh-section-label">Pick a prompt</div>
+        <div className="gh-chip-scroll">
+          <div className="gh-starters-inline">
+            {GITHUB_STARTERS.map((s) => (
+              <Button
+                key={s.prompt}
+                className={`gh-starter-chip ${
+                  selectedGithubPrompt === s.prompt ? "gh-starter-chip-selected" : ""
+                }`}
+                variant="tertiary"
+                size="small"
+                onMouseDown={preventMouseSelection}
+                onClick={() => {
+                  setSelectedGithubPrompt(s.prompt);
+                  setError("");
+                }}
+              >
+                <span className="gh-starter-icon">{s.icon}</span>
+                <span className="gh-starter-chip-label">{s.label}</span>
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Generic fallback */}
-      <div className="gh-divider">
-        <span>or try without GitHub</span>
+      <div className="gh-start-actions">
+        <Button variant="secondary" onClick={handleReset} disabled={!canReset}>
+          Reset
+        </Button>
+        <Button onClick={handleStartGenerating} disabled={!canStart}>
+          Start generating
+        </Button>
       </div>
-      <div className="gh-generic-chips">
-        {STARTER_PROMPTS.map((p) => (
-          <button key={p} className="chip" onClick={() => onGenericPrompt(p)}>
-            {p}
-          </button>
-        ))}
+
+      <div className="gh-connect-secondary">
+        <h2 className="gh-connect-secondary-title">or try other use-cases</h2>
+        <div className="gh-connect-section">
+          <div className="gh-chip-scroll">
+            <div className="gh-generic-chips">
+              {STARTER_PROMPTS.map((p) => (
+                <Button
+                  key={p}
+                  className="chip gh-generic-chip"
+                  variant="tertiary"
+                  size="small"
+                  iconRight={<ArrowRight size={14} />}
+                  onMouseDown={preventMouseSelection}
+                  onClick={() => onGenericPrompt(p)}
+                >
+                  {p}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

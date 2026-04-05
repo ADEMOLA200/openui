@@ -1,5 +1,6 @@
 "use client";
 
+import { IconButton } from "@openuidev/react-ui";
 import { Send, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage, ToolCallEntry } from "../../constants";
@@ -150,13 +151,24 @@ export function ConversationPanel({
             disabled={isStreaming}
           />
           {isStreaming ? (
-            <button className="conv-stop-btn" onClick={onStop}>
-              <Square size={12} fill="currentColor" />
-            </button>
+            <IconButton
+              className="conv-stop-btn"
+              icon={<Square size={12} fill="currentColor" />}
+              variant="tertiary"
+              size="medium"
+              onClick={onStop}
+              aria-label="Stop generation"
+            />
           ) : (
-            <button className="conv-send-btn" onClick={handleSend} disabled={!canSend}>
-              <Send size={14} />
-            </button>
+            <IconButton
+              className="conv-send-btn"
+              icon={<Send size={14} />}
+              variant="primary"
+              size="medium"
+              onClick={handleSend}
+              disabled={!canSend}
+              aria-label="Send message"
+            />
           )}
         </div>
       </div>
