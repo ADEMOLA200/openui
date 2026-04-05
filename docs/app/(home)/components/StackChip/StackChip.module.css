@@ -35,11 +35,11 @@
 }
 
 .badgeWhite {
-  background: var(--openui-foreground);
+  background: var(--openui-text-white);
 }
 
 .badgeBlack {
-  background: var(--openui-inverted-background);
+  background: var(--openui-text-black);
 }
 
 .badgeAnthropic {

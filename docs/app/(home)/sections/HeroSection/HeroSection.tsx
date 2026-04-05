@@ -1,6 +1,8 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { GitHubIcon } from "@/components/brand-logo";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { ClipboardCommandButton, PillLink } from "../../components/Button/Button";
 import styles from "./HeroSection.module.css";
@@ -8,6 +10,7 @@ import styles from "./HeroSection.module.css";
 // CTAs
 const primaryCTA = "npx @openuidev/cli@latest create";
 const secondaryCTA = "Try Playground";
+const openUiLangV05Href = "/docs/openui-lang/specification-v05";
 const DESKTOP_HERO_IMAGE = {
   light: "/homepage/hero-web.png",
   dark: "/homepage/hero-web-dark.png",
@@ -25,6 +28,10 @@ type HeroTheme = "light" | "dark";
 // ---------------------------------------------------------------------------
 // Buttons
 // ---------------------------------------------------------------------------
+
+function TrailingArrow() {
+  return <ArrowRight aria-hidden="true" className={styles.mobileCtaArrow} size={18} strokeWidth={2} />;
+}
 
 function NpmButton({ className = "" }: { className?: string }) {
   return (
@@ -52,7 +59,7 @@ function DesktopPlaygroundButton({ className = "" }: { className?: string }) {
     <PillLink
       href="/playground"
       className={`${styles.desktopPlaygroundButton} ${className}`.trim()}
-      arrow={<span aria-hidden="true">→</span>}
+      arrow={<TrailingArrow />}
     >
       <span>{secondaryCTA}</span>
     </PillLink>
@@ -64,14 +71,38 @@ function MobilePlaygroundButton({ className = "" }: { className?: string }) {
     <PillLink
       href="/playground"
       className={`${styles.mobilePlaygroundButton} ${className}`.trim()}
-      arrow={
-        <span aria-hidden="true" className={styles.mobilePlaygroundArrow}>
-          →
-        </span>
-      }
+      arrow={<TrailingArrow />}
     >
       <span className={styles.mobilePlaygroundLabel}>{secondaryCTA}</span>
     </PillLink>
+  );
+}
+
+function AnnouncementBanner({ className = "" }: { className?: string }) {
+  return (
+    <Link href={openUiLangV05Href} className={`${styles.heroBanner} ${className}`.trim()}>
+      <span className={styles.heroBannerLabel}>We&apos;re introducing OpenUI Lang v0.5</span>
+      <TrailingArrow />
+    </Link>
+  );
+}
+
+function GitHubBanner({ className = "" }: { className?: string }) {
+  return (
+    <a
+      href="https://github.com/thesysdev/openui"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${styles.heroBanner} ${styles.mobileGithubButton} ${className}`.trim()}
+    >
+      <span className={styles.heroBannerLead}>
+        <span aria-hidden="true" className={styles.heroBannerIcon}>
+          <GitHubIcon />
+        </span>
+        <span>Star us on Github</span>
+      </span>
+      <TrailingArrow />
+    </a>
   );
 }
 
@@ -84,6 +115,7 @@ function DesktopHero() {
     <div className={styles.desktopHero}>
       <div className={styles.desktopHeroInner}>
         <div className={styles.desktopHeroLockup}>
+          <AnnouncementBanner />
           <h1 className={styles.desktopTitle}>OpenUI</h1>
           <p className={styles.desktopSubtitle}>
             The Open Standard
@@ -112,22 +144,7 @@ function MobileHero({ theme }: { theme: HeroTheme }) {
     <div className={styles.mobileHero}>
       <div className={styles.mobileHeroIntro}>
         <div className={styles.mobileHeroStack}>
-          <a
-            href="https://github.com/thesysdev/openui"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.mobileGithubBanner}
-          >
-            <span className={styles.mobileGithubBannerLead}>
-              <span aria-hidden="true" className={styles.mobileGithubBannerIcon}>
-                <GitHubIcon />
-              </span>
-              <span>Star us on Github</span>
-            </span>
-            <span aria-hidden="true" className={styles.mobileGithubBannerArrow}>
-              →
-            </span>
-          </a>
+          <AnnouncementBanner />
 
           <div className={styles.mobileBrandGroup}>
             <p className={styles.mobileTitle}>OpenUI</p>
@@ -144,8 +161,9 @@ function MobileHero({ theme }: { theme: HeroTheme }) {
 
       {/* CTA buttons */}
       <div className={styles.mobileCtaStack}>
-        <MobilePlaygroundButton className={styles.mobileCtaButtonWidth} />
         <NpmButton className={styles.mobileCtaButtonWidth} />
+        <MobilePlaygroundButton className={styles.mobileCtaButtonWidth} />
+        <GitHubBanner className={styles.mobileCtaButtonWidth} />
       </div>
 
       {/* Mobile hero image */}
