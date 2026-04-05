@@ -9,46 +9,49 @@
 }
 
 .header {
+  display: flex;
+  justify-content: center;
+  width: 100%;
   margin-bottom: 2rem;
 }
 
 .title {
-  max-width: 673px;
-  font-family: "Inter", sans-serif;
-  font-size: 22px;
+  margin: 0;
+  text-align: center;
+  font-size: 2.5rem;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
+  letter-spacing: -2px;
   color: var(--openui-text-neutral-primary);
 }
 
-.trackViewport {
-  overflow: hidden;
-  margin-block: -2rem;
-  padding-block: 2rem;
+.cardsContainer {
+  max-width: 80rem;
+  margin-inline: auto;
 }
 
-.track {
+.mobileCarouselViewport {
+  overflow: hidden;
+  padding-inline: 1.25rem;
+}
+
+.mobileCarouselTrack {
   display: flex;
   width: max-content;
   gap: 1rem;
-  padding-left: 1rem;
-  user-select: none;
   will-change: transform;
 }
 
-.trackIdle {
-  cursor: grab;
-}
-
-.trackDragging {
-  cursor: grabbing;
+.cardsGrid {
+  display: none;
 }
 
 .card {
   position: relative;
-  width: 240px;
-  flex-shrink: 0;
-  border-radius: 14px;
+  width: 100%;
+  max-width: calc((100vw - 3.5rem) / 1.5);
+  flex: 0 0 calc((100vw - 3.5rem) / 1.5);
+  border-radius: var(--openui-radius-4xl);
   background: var(--openui-foreground);
 }
 
@@ -60,20 +63,15 @@
   border-radius: inherit;
 }
 
-.cardImage,
-.cardImagePlaceholder {
-  width: 100%;
-  aspect-ratio: 5 / 4;
-  border-top-left-radius: 14px;
-  border-top-right-radius: 14px;
-}
-
 .cardImage {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
   object-fit: cover;
-}
-
-.cardImagePlaceholder {
-  background: var(--openui-highlight-subtle);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
 }
 
 .cardBody {
@@ -94,7 +92,7 @@
   inset: 0;
   pointer-events: none;
   border: 1px solid var(--openui-border-default);
-  border-radius: 14px;
+  border-radius: inherit;
   box-shadow: var(--openui-shadow-m);
 }
 
@@ -103,19 +101,25 @@
     padding-inline: 2rem;
   }
 
-  .title {
-    font-size: 32px;
+  .mobileCarouselViewport {
+    display: none;
+  }
+
+  .cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: none;
+    margin-inline: 0;
+    gap: 1.25rem;
+  }
+
+  .cardsContainer {
+    padding-inline: 2rem;
   }
 
   .card {
-    width: 300px;
-    border-radius: 18px;
-  }
-
-  .cardImage,
-  .cardImagePlaceholder {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
+    max-width: none;
+    flex: initial;
   }
 
   .cardBody {
@@ -124,10 +128,6 @@
 
   .cardTitle {
     font-family: "Inter Display", sans-serif;
-    font-size: 22px;
-  }
-
-  .cardOverlay {
-    border-radius: 18px;
+    font-size: 18px;
   }
 }

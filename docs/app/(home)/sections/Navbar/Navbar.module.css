@@ -40,13 +40,6 @@
   background: var(--home-color-surface-soft);
 }
 
-.themeToggle {
-  --theme-toggle-fg: var(--home-color-text-primary);
-  --theme-toggle-hover-bg: var(--home-color-surface-soft);
-  --theme-toggle-hover-fg: var(--home-color-text-primary);
-  --theme-toggle-ring: var(--home-border-default);
-}
-
 .mobileBackdrop {
   position: absolute;
   top: 100%;

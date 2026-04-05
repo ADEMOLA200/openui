@@ -1,12 +1,11 @@
 "use client";
 
 import { siteConfig } from "@/lib/layout.shared";
-import { Tabs, TabsList, TabsTrigger } from "@openuidev/react-ui";
 import { SidebarTrigger } from "fumadocs-ui/components/sidebar/base";
 import { useSearchContext } from "fumadocs-ui/contexts/search";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { GitHubStarButton } from "./brand-logo";
 import styles from "./docs-navbar.module.css";
@@ -75,7 +74,6 @@ function SearchBar() {
 
 export function DocsNavbar({ showSidebarToggle = false }: { showSidebarToggle?: boolean }) {
   const pathname = usePathname();
-  const router = useRouter();
   const { resolvedTheme } = useTheme();
   const logoVariant = resolvedTheme === "dark" ? "dark" : "light";
 
@@ -137,19 +135,22 @@ export function DocsNavbar({ showSidebarToggle = false }: { showSidebarToggle?: 
       </div>
       <div className={styles.tabsBar}>
         <div className={styles.tabsInner}>
-          <Tabs
-            className={styles.docsTabsRoot}
-            value={tabValue}
-            onValueChange={(url) => {
-              router.push(url);
-            }}
-          >
-            <TabsList variant="title" className={styles.docsTabsList}>
-              {tabs.map((tab) => (
-                <TabsTrigger key={tab.url} value={tab.url} text={tab.title} />
-              ))}
-            </TabsList>
-          </Tabs>
+          <nav className={styles.tabsNav} aria-label="Documentation sections">
+            {tabs.map((tab) => {
+              const isActive = tab.url === tabValue;
+
+              return (
+                <Link
+                  key={tab.url}
+                  href={tab.url}
+                  className={`${styles.tabLink} ${isActive ? styles.tabLinkActive : ""}`.trim()}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {tab.title}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </header>

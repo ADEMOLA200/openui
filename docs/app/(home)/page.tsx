@@ -8,22 +8,20 @@ import { PossibilitiesSection } from "./sections/PossibilitiesSection/Possibilit
 import { ShiroMascot } from "./sections/ShiroMascot/ShiroMascot";
 import { StepsSection } from "./sections/StepsSection/StepsSection";
 import { TweetWallSection } from "./sections/TweetWallSection/TweetWallSection";
-import { UILibrariesSection } from "./sections/UILibrariesSection/UILibrariesSection";
 
 export default function HomePage() {
   return (
     <div className={styles.page}>
-      <HeroSection />
-      <ShiroMascot />
-      <StepsSection />
+      <div className={styles.heroShell}>
+        <HeroSection />
+        <ShiroMascot />
+        <StepsSection />
+      </div>
       <div className={styles.contentSection}>
         <GradientDivider direction="down" />
         <div className={styles.contentShell}>
           <PossibilitiesSection />
-          <div className={styles.compatibilityStack}>
-            <UILibrariesSection />
-            <CompatibilitySection />
-          </div>
+          <CompatibilitySection />
           <FeaturesSection />
           <TweetWallSection />
         </div>

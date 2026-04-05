@@ -1,18 +1,27 @@
 "use client";
 
 import { GitHubIcon } from "@/components/brand-logo";
-import HeroPreviewFrame from "@/imports/Frame2147239423";
-import svgMascotPaths from "@/imports/svg-148i9mcxjn";
-import svgHeroPaths from "@/imports/svg-a5kdrdeeao";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 import { ClipboardCommandButton, PillLink } from "../../components/Button/Button";
 import styles from "./HeroSection.module.css";
-
-const LazyMobileActionFigure = lazy(() => import("@/imports/MobileActionFigure"));
 
 // CTAs
 const primaryCTA = "npx @openuidev/cli@latest create";
 const secondaryCTA = "Try Playground";
+const DESKTOP_HERO_IMAGE = {
+  light: "/homepage/hero-web.png",
+  dark: "/homepage/hero-web-dark.png",
+  width: 2040,
+  height: 704,
+} as const;
+const MOBILE_HERO_IMAGE = {
+  light: "/homepage/mobile-hero.png",
+  dark: "/homepage/mobile-hero-dark.png",
+  width: 804,
+  height: 880,
+} as const;
+
+type HeroTheme = "light" | "dark";
 // ---------------------------------------------------------------------------
 // Buttons
 // ---------------------------------------------------------------------------
@@ -67,37 +76,6 @@ function MobilePlaygroundButton({ className = "" }: { className?: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Mascot SVG (mobile hero)
-// ---------------------------------------------------------------------------
-
-const MASCOT_STROKED_PATHS = [
-  svgMascotPaths.p75ec1f0,
-  svgMascotPaths.p3d8f4800,
-  svgMascotPaths.p186ed000,
-  svgMascotPaths.p5c95b80,
-  svgMascotPaths.p2d8cb380,
-] as const;
-
-const MASCOT_FILLED_PATHS = [
-  svgMascotPaths.p6bfe080,
-  svgMascotPaths.pe416040,
-  svgMascotPaths.p34c31400,
-] as const;
-
-function MascotSvg() {
-  return (
-    <svg className={styles.mobileMascotSvg} fill="none" viewBox="0 0 107.917 87.2814">
-      {MASCOT_STROKED_PATHS.map((d) => (
-        <path key={d.slice(0, 20)} d={d} fill="black" stroke="black" strokeWidth="0.458571" />
-      ))}
-      {MASCOT_FILLED_PATHS.map((d) => (
-        <path key={d.slice(0, 20)} d={d} fill="black" />
-      ))}
-    </svg>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Desktop hero
 // ---------------------------------------------------------------------------
 
@@ -105,40 +83,18 @@ function DesktopHero() {
   return (
     <div className={styles.desktopHero}>
       <div className={styles.desktopHeroInner}>
-        {/* Invisible spacer for aspect ratio */}
-        <svg
-          className={styles.desktopHeroSpacer}
-          fill="none"
-          viewBox="0 0 1600 376"
-          aria-hidden="true"
-        >
-          <rect width="1600" height="376" />
-        </svg>
-
-        {/* Title */}
-        <div className={styles.heroLayerMotion}>
-          <svg className={styles.fillSvg} fill="none" viewBox="0 0 1600 376">
-            <path d={svgHeroPaths.pb12f700} fill="black" />
-          </svg>
+        <div className={styles.desktopHeroLockup}>
+          <h1 className={styles.desktopTitle}>OpenUI</h1>
+          <p className={styles.desktopSubtitle}>
+            The Open Standard
+            <br />
+            for Generative UI
+          </p>
         </div>
 
-        {/* Subtitle */}
-        <div className={styles.heroLayerMotion}>
-          <svg className={styles.fillSvg} fill="none" viewBox="0 0 1600 376">
-            <g transform="translate(180 0)">
-              <g transform="translate(880 75) scale(1.5) translate(-980 -108)">
-                <path d={svgHeroPaths.p38a6ed80} fill="black" fillOpacity="0.4" />
-              </g>
-            </g>
-          </svg>
-        </div>
-
-        {/* CTA buttons */}
-        <div className={styles.desktopCtaLayer}>
-          <div className={styles.desktopCtaStack}>
-            <NpmButton />
-            <DesktopPlaygroundButton />
-          </div>
+        <div className={styles.desktopCtaStack}>
+          <NpmButton />
+          <DesktopPlaygroundButton />
         </div>
       </div>
     </div>
@@ -149,7 +105,9 @@ function DesktopHero() {
 // Mobile hero
 // ---------------------------------------------------------------------------
 
-function MobileHero() {
+function MobileHero({ theme }: { theme: HeroTheme }) {
+  const mobileHeroImage = theme === "dark" ? MOBILE_HERO_IMAGE.dark : MOBILE_HERO_IMAGE.light;
+
   return (
     <div className={styles.mobileHero}>
       <div className={styles.mobileHeroIntro}>
@@ -172,11 +130,6 @@ function MobileHero() {
           </a>
 
           <div className={styles.mobileBrandGroup}>
-            <div className={styles.mobileMascotWrap}>
-              <MascotSvg />
-            </div>
-
-            {/* Title */}
             <p className={styles.mobileTitle}>OpenUI</p>
           </div>
 
@@ -195,58 +148,44 @@ function MobileHero() {
         <NpmButton className={styles.mobileCtaButtonWidth} />
       </div>
 
-      {/* Full-width hero illustration */}
+      {/* Mobile hero image */}
       <div className={styles.mobileIllustrationViewport}>
-        <Suspense fallback={<div className={styles.mobileIllustrationFallback} />}>
-          <LazyMobileActionFigure />
-        </Suspense>
+        <img
+          src={mobileHeroImage}
+          alt="OpenUI mobile hero preview"
+          width={MOBILE_HERO_IMAGE.width}
+          height={MOBILE_HERO_IMAGE.height}
+          className={styles.mobileIllustrationImage}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+        />
       </div>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Desktop preview frame (ResizeObserver-scaled)
+// Desktop preview image
 // ---------------------------------------------------------------------------
 
-const PREVIEW_NATIVE_WIDTH = 1600;
-const PREVIEW_SCALE_MULTIPLIER = 1.25;
+function PreviewImage({ theme }: { theme: HeroTheme }) {
+  const desktopHeroImage = theme === "dark" ? DESKTOP_HERO_IMAGE.dark : DESKTOP_HERO_IMAGE.light;
 
-function ScaledPreview() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const frameRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => {
-      setScale(entry.contentRect.width / PREVIEW_NATIVE_WIDTH);
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!frameRef.current) return;
-    frameRef.current.style.setProperty("--preview-scale", String(scale * PREVIEW_SCALE_MULTIPLIER));
-  }, [scale]);
-
-  return (
-    <div ref={containerRef} className={styles.previewScaleContainer}>
-      <div ref={frameRef} className={styles.previewScaleFrame}>
-        <HeroPreviewFrame />
-      </div>
-    </div>
-  );
-}
-
-function PreviewImage() {
   return (
     <div className={styles.previewSection}>
       <div className={styles.previewDesktopOnly}>
         <div className={styles.previewFrame}>
-          <ScaledPreview />
+          <img
+            src={desktopHeroImage}
+            alt="OpenUI desktop hero preview"
+            width={DESKTOP_HERO_IMAGE.width}
+            height={DESKTOP_HERO_IMAGE.height}
+            className={styles.previewImage}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
         </div>
       </div>
     </div>
@@ -275,11 +214,14 @@ function Tagline() {
 // ---------------------------------------------------------------------------
 
 export function HeroSection() {
+  const { resolvedTheme } = useTheme();
+  const theme: HeroTheme = resolvedTheme === "dark" ? "dark" : "light";
+
   return (
     <section className={styles.section}>
       <DesktopHero />
-      <MobileHero />
-      <PreviewImage />
+      <MobileHero theme={theme} />
+      <PreviewImage theme={theme} />
       <Tagline />
     </section>
   );

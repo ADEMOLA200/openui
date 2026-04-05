@@ -222,7 +222,7 @@ export function GitHubIcon() {
           preserveAspectRatio="none"
           viewBox="0 0 19.3333 18.8561"
         >
-          <path d={svgPaths.p294daf00} fill="black" stroke="black" />
+          <path d={svgPaths.p294daf00} fill="currentColor" stroke="currentColor" />
         </svg>
       </div>
     </div>

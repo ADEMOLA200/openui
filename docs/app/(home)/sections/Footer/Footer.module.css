@@ -29,12 +29,17 @@
   height: 96px;
   width: 96px;
   flex-shrink: 0;
+  color: var(--openui-text-neutral-primary);
 }
 
 .handcraftedMascot {
   position: absolute;
   inset: 9.29% 0 10% 0;
   display: block;
+}
+
+.handcraftedMascotDark {
+  inset: 0;
 }
 
 .handcraftedCopy {
@@ -77,6 +82,7 @@
   position: relative;
   height: 3rem;
   width: 124px;
+  color: var(--openui-text-neutral-primary);
 }
 
 .bottomBar {
@@ -122,6 +128,7 @@
   position: relative;
   height: 1.5rem;
   width: 1.5rem;
+  color: var(--openui-text-neutral-tertiary);
 }
 
 .socialIconWrap {
