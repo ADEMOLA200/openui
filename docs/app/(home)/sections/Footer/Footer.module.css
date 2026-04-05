@@ -11,7 +11,7 @@
 
 .handcraftedSection {
   width: 100%;
-  padding-inline: var(--home-section-padding-inline);
+  padding-inline: 1.25rem;
 }
 
 .handcraftedContainer {
@@ -42,7 +42,7 @@
   font-family: var(--font-geist-mono);
   font-size: 18px;
   line-height: 1.2;
-  color: var(--home-color-text-primary);
+  color: var(--openui-text-neutral-primary);
   margin-top: 12px;
 }
 
@@ -53,8 +53,8 @@
 }
 
 .contentSection {
-  padding: 60px var(--home-section-padding-inline) 1rem;
-  background: var(--home-color-surface);
+  padding: 60px 1.25rem 1rem;
+  background: var(--openui-foreground);
 }
 
 .contentContainer {
@@ -82,7 +82,7 @@
 .bottomBar {
   margin-top: 2.5rem;
   padding-block: 1rem;
-  border-top: 1px solid rgb(0 0 0 / 4%);
+  border-top: 1px solid var(--openui-border-default);
 }
 
 .desktopBottomBar {
@@ -94,7 +94,7 @@
   font-family: "Inter", sans-serif;
   font-size: 15px;
   line-height: 1.5;
-  color: var(--home-color-text-muted);
+  color: var(--openui-text-neutral-secondary);
 }
 
 .desktopMetaLeft {
@@ -157,7 +157,7 @@
   font-family: "Inter", sans-serif;
   font-size: 12px;
   line-height: 1.5;
-  color: var(--home-color-text-muted);
+  color: var(--openui-text-neutral-secondary);
 }
 
 @keyframes handcraftedCursorBlink {
@@ -173,6 +173,13 @@
 }
 
 @media (min-width: 1024px) {
+  .handcraftedSection {
+    padding-inline: 2rem;
+  }
+
+  .contentSection {
+    padding-inline: 2rem;
+  }
   .desktopLogoRow {
     display: flex;
     flex-direction: column;

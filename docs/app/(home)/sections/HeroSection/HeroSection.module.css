@@ -11,10 +11,10 @@
   gap: 0.625rem;
   padding-left: 1.25rem;
   padding-right: 0.5rem;
-  border: 1px solid var(--home-border-soft);
-  border-radius: var(--home-radius-pill);
-  background: var(--home-color-surface);
-  box-shadow: var(--home-shadow-elevated);
+  border: 1px solid var(--openui-border-default);
+  border-radius: var(--openui-radius-full);
+  background: var(--openui-foreground);
+  box-shadow: var(--openui-shadow-l);
   cursor: pointer;
   transition:
     transform 0.2s ease,
@@ -27,7 +27,7 @@
 }
 
 .desktopPlaygroundButton:hover {
-  background: var(--home-color-surface-soft);
+  background: var(--openui-highlight);
 }
 
 .npmDesktopLabel,
@@ -48,7 +48,7 @@
   display: none;
   font-family: var(--font-geist-mono);
   white-space: nowrap;
-  color: var(--home-color-text-primary);
+  color: var(--openui-text-neutral-primary);
 }
 
 .npmMobileLabel {
@@ -70,7 +70,7 @@
   font-family: var(--font-geist-mono);
   white-space: nowrap;
   padding-right: 2rem;
-  color: var(--home-color-text-primary);
+  color: var(--openui-text-neutral-primary);
 }
 
 .npmIconBadge {
@@ -81,7 +81,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: var(--home-color-surface-inverse);
+  background: var(--openui-inverted-background);
 }
 
 .desktopPlaygroundButton,
@@ -96,16 +96,16 @@
 }
 
 .desktopPlaygroundButton {
-  padding-inline: var(--home-pill-padding-inline);
-  color: var(--home-color-text-primary);
+  padding-inline: 1.25rem;
+  color: var(--openui-text-neutral-primary);
   transition: background-color 0.2s ease;
 }
 
 .mobilePlaygroundButton {
   flex-shrink: 0;
-  padding-inline: var(--home-pill-padding-inline);
+  padding-inline: 1.25rem;
   border-radius: 100px;
-  background: var(--home-color-surface-inverse);
+  background: var(--openui-inverted-background);
   transition: background-color 0.2s ease;
 }
 
@@ -115,11 +115,11 @@
 
 .mobilePlaygroundLabel {
   white-space: nowrap;
-  color: var(--home-color-text-inverse);
+  color: var(--openui-text-accent-primary);
 }
 
 .mobilePlaygroundArrow {
-  color: var(--home-color-text-inverse);
+  color: var(--openui-text-accent-primary);
   font-size: 20px;
   line-height: 1;
 }
@@ -187,7 +187,7 @@
 
 .mobileHeroIntro {
   position: relative;
-  padding: 32px var(--home-section-padding-inline) var(--home-section-padding-inline);
+  padding: 32px 1.25rem 1.25rem;
 }
 
 .mobileHeroStack {
@@ -215,9 +215,9 @@
   gap: 0.5rem;
   min-height: 2.5rem;
   padding-inline: 1rem;
-  border-radius: var(--home-radius-pill);
-  background: var(--home-color-surface-soft);
-  color: var(--home-color-text-primary);
+  border-radius: var(--openui-radius-full);
+  background: var(--openui-highlight);
+  color: var(--openui-text-neutral-primary);
   text-decoration: none;
   font-family: "Inter Display", sans-serif;
   font-size: 16px;
@@ -227,7 +227,7 @@
 }
 
 .mobileGithubBanner:hover {
-  background: var(--home-color-surface-muted);
+  background: var(--openui-highlight-strong);
 }
 
 .mobileGithubBannerLead {
@@ -261,7 +261,7 @@
   font-size: 80px;
   font-weight: 600;
   line-height: 1.25;
-  color: var(--home-color-text-primary);
+  color: var(--openui-text-neutral-primary);
 }
 
 .mobileSubtitle {
@@ -270,7 +270,7 @@
   font-size: 22px;
   font-weight: 500;
   line-height: 1.2;
-  color: var(--home-color-text-muted);
+  color: var(--openui-text-neutral-secondary);
 }
 
 .mobileCtaStack {
@@ -335,7 +335,7 @@
 
 .taglineSection {
   margin-top: 1.25rem;
-  padding-inline: var(--home-section-padding-inline);
+  padding-inline: 1.25rem;
 }
 
 .taglineContainer {
@@ -349,7 +349,7 @@
   font-size: 22px;
   font-weight: 500;
   line-height: 1.4;
-  color: var(--home-color-text-muted);
+  color: var(--openui-text-neutral-secondary);
 }
 
 .taglineBreak {
@@ -381,7 +381,7 @@
     position: relative;
     width: 100%;
     overflow: hidden;
-    padding: 5.5rem var(--home-section-padding-inline) 5.5rem;
+    padding: 5.5rem 2rem 5.5rem;
   }
 
   .previewSection {
@@ -394,7 +394,7 @@
 
   .taglineSection {
     margin-top: 2.5rem;
-    padding: 2.5rem var(--home-section-padding-inline) 0;
+    padding: 2.5rem 2rem 0;
   }
 
   .tagline {

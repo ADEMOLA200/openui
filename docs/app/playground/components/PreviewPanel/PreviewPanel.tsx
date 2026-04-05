@@ -2,8 +2,7 @@ import type { ActionEvent, ParseResult } from "@openuidev/react-lang";
 import { Renderer } from "@openuidev/react-lang";
 import { openuiLibrary, ThemeProvider } from "@openuidev/react-ui";
 import { Loader2, Maximize2, Monitor } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Theme } from "../../constants";
+import { useCallback, useState } from "react";
 import { Modal } from "../Modal/Modal";
 import "./PreviewPanel.css";
 
@@ -11,7 +10,7 @@ type PreviewPanelProps = {
   code: string;
   isStreaming: boolean;
   onParseResult?: (result: ParseResult | null) => void;
-  theme: Theme;
+  mode: "light" | "dark";
   toolProvider?: Record<string, (args: Record<string, unknown>) => Promise<unknown>> | null;
   onAction?: (event: ActionEvent) => void;
 };
@@ -20,32 +19,17 @@ export function PreviewPanel({
   code,
   isStreaming,
   onParseResult,
-  theme,
+  mode,
   toolProvider,
   onAction,
 }: PreviewPanelProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [systemDark, setSystemDark] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    setSystemDark(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setSystemDark(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  const resolvedMode = useMemo(() => {
-    if (theme === "system") return systemDark ? "dark" : "light";
-    return theme;
-  }, [theme, systemDark]);
-
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   const previewContent = code ? (
     <div className="preview-content">
-      <ThemeProvider mode={resolvedMode}>
+      <ThemeProvider mode={mode}>
         <Renderer
           response={code}
           library={openuiLibrary}

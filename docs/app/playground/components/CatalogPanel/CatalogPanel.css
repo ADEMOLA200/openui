@@ -4,7 +4,7 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--openui-border-default);
   overflow: hidden;
   transition: width 0.2s ease;
 }
@@ -15,8 +15,8 @@
 
 .catalog-panel-header {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--border-strong);
-  background: var(--page-bg);
+  border-bottom: 1px solid var(--openui-border-interactive);
+  background: var(--openui-background);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -36,7 +36,7 @@
   font-size: 13px;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--text-primary);
+  color: var(--openui-text-neutral-primary);
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -47,7 +47,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
+  color: var(--openui-text-neutral-secondary);
 }
 
 .catalog-panel-toggle {
@@ -59,7 +59,7 @@
   background: transparent;
   border: none;
   border-radius: 6px;
-  color: var(--text-tertiary);
+  color: var(--openui-text-neutral-tertiary);
   cursor: pointer;
   flex-shrink: 0;
   transition:
@@ -68,8 +68,8 @@
 }
 
 .catalog-panel-toggle:hover {
-  background: var(--btn-ghost-hover);
-  color: var(--text-primary);
+  background: var(--openui-highlight);
+  color: var(--openui-text-neutral-primary);
 }
 
 .catalog-panel-body--hidden {
@@ -98,9 +98,9 @@
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--openui-text-neutral-tertiary);
   padding-bottom: 5px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--openui-border-default);
 }
 
 /* ─── Chips ──────────────────────────────────────────────────────────────────── */
@@ -111,13 +111,13 @@
 }
 
 .catalog-chip {
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
   font-size: 11px;
   padding: 2px 8px;
-  background: var(--chip-bg);
-  border: 1px solid var(--chip-border);
+  background: var(--openui-highlight-subtle);
+  border: 1px solid var(--openui-border-default);
   border-radius: 5px;
-  color: var(--text-secondary);
+  color: var(--openui-text-neutral-secondary);
   cursor: pointer;
   user-select: none;
   transition:
@@ -127,44 +127,44 @@
 }
 
 .catalog-chip:hover {
-  background: var(--chip-hover);
-  border-color: var(--border-strong);
-  color: var(--text-primary);
+  background: var(--openui-highlight);
+  border-color: var(--openui-border-interactive);
+  color: var(--openui-text-neutral-primary);
 }
 
 .catalog-chip--active {
-  background: var(--chip-hover);
-  border-color: var(--border-strong);
-  color: var(--text-primary);
+  background: var(--openui-highlight);
+  border-color: var(--openui-border-interactive);
+  color: var(--openui-text-neutral-primary);
 }
 
 /* ─── Prop Panel ─────────────────────────────────────────────────────────────── */
 .catalog-prop-panel {
-  background: var(--page-bg);
-  border: 1px solid var(--border);
+  background: var(--openui-background);
+  border: 1px solid var(--openui-border-default);
   border-radius: 6px;
   overflow: hidden;
 }
 
 .catalog-prop-panel-header {
   padding: 7px 10px 6px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--openui-border-default);
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 
 .catalog-prop-comp-name {
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--openui-text-neutral-primary);
 }
 
 .catalog-prop-desc {
-  font-family: var(--font-sans);
+  font-family: var(--openui-font-body);
   font-size: 10px;
-  color: var(--text-tertiary);
+  color: var(--openui-text-neutral-tertiary);
   line-height: 1.5;
 }
 
@@ -178,7 +178,7 @@
   align-items: baseline;
   gap: 6px;
   padding: 4px 10px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--openui-border-default);
 }
 
 .catalog-prop-row:last-child {
@@ -186,18 +186,18 @@
 }
 
 .catalog-prop-name {
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
   font-size: 10px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--openui-text-neutral-primary);
   flex-shrink: 0;
   min-width: 64px;
 }
 
 .catalog-prop-type {
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
   font-size: 10px;
-  color: var(--text-secondary);
+  color: var(--openui-text-neutral-secondary);
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -205,9 +205,9 @@
 }
 
 .catalog-prop-empty {
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
   font-size: 10px;
-  color: var(--text-tertiary);
+  color: var(--openui-text-neutral-tertiary);
   padding: 8px 10px;
 }
 
@@ -220,9 +220,9 @@
 }
 
 .catalog-note {
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
   font-size: 10px;
-  color: var(--text-tertiary);
+  color: var(--openui-text-neutral-tertiary);
   line-height: 1.6;
 }
 
@@ -257,7 +257,7 @@
   .catalog-panel {
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--openui-border-default);
     flex-shrink: 0;
     transition: none;
   }

@@ -2,7 +2,8 @@
 
 import { mergeStatements } from "@openuidev/react-lang";
 import { Code2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ConversationPanel } from "./components/ConversationPanel/ConversationPanel";
 import { GitHubConnect } from "./components/GitHubConnect/GitHubConnect";
 import { Header } from "./components/Header/Header";
@@ -157,7 +158,7 @@ async function streamChat(
 
 export default function PlaygroundPage() {
   // Theme / model
-  const [theme, setTheme] = useState<Theme>("system");
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [model, setModel] = useState<Model>("openai/gpt-5.4-mini");
 
   // GitHub connection
@@ -183,12 +184,8 @@ export default function PlaygroundPage() {
   const [elapsed, setElapsed] = useState<number | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Prompt (for generic mode)
-  const [prompt, setPrompt] = useState("");
-
   const abortRef = useRef<AbortController | null>(null);
   const responseRef = useRef("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Track pending auto-send from GitHub connect + starter combo
   const pendingPromptRef = useRef<string | null>(null);
 
@@ -197,14 +194,17 @@ export default function PlaygroundPage() {
   const isGitHub = githubUsername !== null;
 
   // Theme
-  useEffect(() => {
-    const el = document.documentElement;
-    if (theme === "system") el.removeAttribute("data-theme");
-    else el.setAttribute("data-theme", theme);
+  const currentTheme = useMemo<Theme>(() => {
+    if (theme === "light" || theme === "dark" || theme === "system") {
+      return theme;
+    }
+    return "system";
   }, [theme]);
 
+  const resolvedMode = resolvedTheme === "dark" ? "dark" : "light";
+
   const cycleTheme = () =>
-    setTheme((t) => (t === "system" ? "light" : t === "light" ? "dark" : "system"));
+    setTheme(currentTheme === "system" ? "light" : currentTheme === "light" ? "dark" : "system");
 
   // Timer
   useEffect(() => {
@@ -243,7 +243,6 @@ export default function PlaygroundPage() {
     setStreamingText("");
     setToolCalls([]);
     setElapsed(null);
-    setPrompt("");
     setShowSource(false);
     setParsedJson(null);
     setErrorMsg("");
@@ -368,18 +367,6 @@ export default function PlaygroundPage() {
     setStatus("idle");
   };
 
-  // ── Generic mode handlers ────────────────────────────────────────────
-
-  const handleGenericSubmit = useCallback(() => {
-    if (!prompt.trim() || isStreaming) return;
-    send(prompt.trim());
-    setPrompt("");
-  }, [prompt, isStreaming, send]);
-
-  const handleGenericPrompt = (text: string) => {
-    send(text);
-  };
-
   const handleConnectAndPrompt = useCallback(
     (username: string, promptText: string) => {
       // Set pending prompt BEFORE connecting — the useEffect will fire it
@@ -397,12 +384,10 @@ export default function PlaygroundPage() {
   return (
     <div className="app">
       <Header
-        theme={theme}
+        theme={currentTheme}
         onThemeToggle={cycleTheme}
         hasApiKey={false}
         onChangeKey={() => {}}
-        githubUsername={githubUsername}
-        onDisconnect={handleDisconnect}
       />
 
       <div className="app-body">
@@ -504,7 +489,7 @@ export default function PlaygroundPage() {
                     code={dashboardCode!}
                     isStreaming={isStreaming}
                     onParseResult={(r) => setParsedJson(r ? JSON.stringify(r, null, 2) : null)}
-                    theme={theme}
+                    mode={resolvedMode}
                     toolProvider={toolProvider}
                     onAction={(event) => {
                       if (event.type === "continue_conversation") {

@@ -9,7 +9,7 @@
 .bar {
   width: 100%;
   flex-shrink: 0;
-  background: rgb(0 0 0 / 4%);
+  background: var(--openui-highlight-subtle);
 }
 
 .barHeight60 {

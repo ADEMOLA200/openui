@@ -15,7 +15,7 @@
   border: none;
   padding: 4px 10px;
   border-radius: 6px;
-  font-family: var(--font-sans);
+  font-family: var(--openui-font-body);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -51,7 +51,7 @@
   letter-spacing: 0;
   text-transform: none;
   line-height: 1.5;
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
 }
 
 .code-tab.active .token-count {
@@ -75,7 +75,7 @@
   color: rgba(255, 255, 255, 0.75);
   font-size: 11px;
   font-weight: 400;
-  font-family: var(--font-sans);
+  font-family: var(--openui-font-body);
   letter-spacing: 0;
   text-transform: none;
   white-space: nowrap;
@@ -129,16 +129,16 @@
 .code-body {
   flex: 1;
   overflow: auto;
-  background: var(--code-bg);
+  background: var(--openui-inverted-background);
 }
 
 .code-pre {
   padding: 20px;
   margin: 0;
-  font-family: var(--font-mono);
+  font-family: var(--openui-font-code);
   font-size: 13px;
   line-height: 1.65;
-  color: var(--code-text);
+  color: var(--openui-text-accent-primary);
   white-space: pre-wrap;
   word-break: break-word;
   min-height: 100%;
@@ -149,7 +149,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--text-tertiary);
+  background: var(--openui-text-neutral-tertiary);
   flex-shrink: 0;
 }
 

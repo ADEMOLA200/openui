@@ -5,7 +5,7 @@
 .headerContainer {
   max-width: 75rem;
   margin-inline: auto;
-  padding-inline: var(--home-section-padding-inline);
+  padding-inline: 1.25rem;
 }
 
 .header {
@@ -18,7 +18,7 @@
   font-size: 22px;
   font-weight: 600;
   line-height: 1.25;
-  color: #000;
+  color: var(--openui-text-neutral-primary);
 }
 
 .trackViewport {
@@ -49,7 +49,7 @@
   width: 240px;
   flex-shrink: 0;
   border-radius: 14px;
-  background: #fff;
+  background: var(--openui-foreground);
 }
 
 .cardInner {
@@ -73,7 +73,7 @@
 }
 
 .cardImagePlaceholder {
-  background: rgb(0 0 0 / 4%);
+  background: var(--openui-highlight-subtle);
 }
 
 .cardBody {
@@ -86,21 +86,23 @@
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
-  color: #000;
+  color: var(--openui-text-neutral-primary);
 }
 
 .cardOverlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border: 1px solid var(--home-border-soft);
+  border: 1px solid var(--openui-border-default);
   border-radius: 14px;
-  box-shadow:
-    0 1px 2px 0 rgb(22 34 51 / 4%),
-    0 8px 16px 0 rgb(22 34 51 / 4%);
+  box-shadow: var(--openui-shadow-m);
 }
 
 @media (min-width: 1024px) {
+  .headerContainer {
+    padding-inline: 2rem;
+  }
+
   .title {
     font-size: 32px;
   }
