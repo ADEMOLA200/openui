@@ -12,6 +12,8 @@ type GitHubConnectProps = {
   onGenericPrompt: (prompt: string) => void;
 };
 
+const RANDOM_SENTINEL = "__random__";
+
 const DEMO_USERS = [
   { username: "torvalds", label: "Linus Torvalds" },
   { username: "yyx990803", label: "Evan You" },
@@ -78,10 +80,21 @@ export function GitHubConnect({
     event.preventDefault();
   }, []);
 
-  const handlePopularDeveloperSelect = useCallback((nextUsername: string) => {
-    setUsername(nextUsername);
-    setError("");
+  const pickRandomPrompt = useCallback(() => {
+    const idx = Math.floor(Math.random() * GITHUB_STARTERS.length);
+    return GITHUB_STARTERS[idx].prompt;
   }, []);
+
+  const handlePopularDeveloperSelect = useCallback(
+    (nextUsername: string) => {
+      setUsername(nextUsername);
+      setError("");
+      if (!selectedGithubPrompt) {
+        setSelectedGithubPrompt(RANDOM_SENTINEL);
+      }
+    },
+    [selectedGithubPrompt],
+  );
 
   const trimmedUsername = username.trim();
   const hasValidUsername =
@@ -104,7 +117,9 @@ export function GitHubConnect({
   const handleStartGenerating = () => {
     if (selectedGithubPrompt) {
       if (!validate(username)) return;
-      onConnectAndPrompt(trimmedUsername, selectedGithubPrompt);
+      const prompt =
+        selectedGithubPrompt === RANDOM_SENTINEL ? pickRandomPrompt() : selectedGithubPrompt;
+      onConnectAndPrompt(trimmedUsername, prompt);
     }
   };
 
@@ -139,25 +154,32 @@ export function GitHubConnect({
         <div className="gh-section-label">or try with any of these popular developers</div>
         <div className="gh-chip-scroll">
           <div className="gh-demo-users">
-            {DEMO_USERS.map((u) => (
-              <Button
-                key={u.username}
-                className={`gh-demo-chip ${selectedDemoUsername === u.username ? "gh-demo-chip-selected" : ""}`}
-                variant="tertiary"
-                size="small"
-                onMouseDown={preventMouseSelection}
-                onClick={() => handlePopularDeveloperSelect(u.username)}
-              >
-                <img
-                  src={`https://github.com/${u.username}.png?size=24`}
-                  alt=""
-                  className="gh-demo-avatar"
-                />
-                <span className="gh-demo-copy">
-                  <span className="gh-demo-name">{u.label}</span>
-                  <span className="gh-demo-handle">@{u.username}</span>
-                </span>
-              </Button>
+            {[0, 1].map((row) => (
+              <div key={row} className="gh-chip-row">
+                {DEMO_USERS.slice(
+                  row * Math.ceil(DEMO_USERS.length / 2),
+                  (row + 1) * Math.ceil(DEMO_USERS.length / 2),
+                ).map((u) => (
+                  <Button
+                    key={u.username}
+                    className={`gh-demo-chip ${selectedDemoUsername === u.username ? "gh-demo-chip-selected" : ""}`}
+                    variant="tertiary"
+                    size="small"
+                    onMouseDown={preventMouseSelection}
+                    onClick={() => handlePopularDeveloperSelect(u.username)}
+                  >
+                    <img
+                      src={`https://github.com/${u.username}.png?size=24`}
+                      alt=""
+                      className="gh-demo-avatar"
+                    />
+                    <span className="gh-demo-copy">
+                      <span className="gh-demo-name">{u.label}</span>
+                      <span className="gh-demo-handle">@{u.username}</span>
+                    </span>
+                  </Button>
+                ))}
+              </div>
             ))}
           </div>
         </div>
@@ -167,24 +189,41 @@ export function GitHubConnect({
         <div className="gh-section-label">Pick a prompt</div>
         <div className="gh-chip-scroll">
           <div className="gh-starters-inline">
-            {GITHUB_STARTERS.map((s) => (
-              <Button
-                key={s.prompt}
-                className={`gh-starter-chip ${
-                  selectedGithubPrompt === s.prompt ? "gh-starter-chip-selected" : ""
-                }`}
-                variant="tertiary"
-                size="small"
-                onMouseDown={preventMouseSelection}
-                onClick={() => {
-                  setSelectedGithubPrompt(s.prompt);
-                  setError("");
-                }}
-              >
-                <span className="gh-starter-icon">{s.icon}</span>
-                <span className="gh-starter-chip-label">{s.label}</span>
-              </Button>
-            ))}
+            {(() => {
+              const allStarters = [
+                { key: RANDOM_SENTINEL, icon: "🎲", label: "Random", prompt: RANDOM_SENTINEL },
+                ...GITHUB_STARTERS.map((s) => ({ key: s.prompt, ...s })),
+              ];
+              const mid = Math.ceil(allStarters.length / 2);
+              return [0, 1].map((row) => (
+                <div key={row} className="gh-chip-row">
+                  {allStarters.slice(row * mid, (row + 1) * mid).map((s) => (
+                    <Button
+                      key={s.key}
+                      className={`gh-starter-chip ${
+                        s.prompt === RANDOM_SENTINEL
+                          ? selectedGithubPrompt === RANDOM_SENTINEL
+                            ? "gh-starter-chip-selected"
+                            : ""
+                          : selectedGithubPrompt === s.prompt
+                            ? "gh-starter-chip-selected"
+                            : ""
+                      }`}
+                      variant="tertiary"
+                      size="small"
+                      onMouseDown={preventMouseSelection}
+                      onClick={() => {
+                        setSelectedGithubPrompt(s.prompt);
+                        setError("");
+                      }}
+                    >
+                      <span className="gh-starter-icon">{s.icon}</span>
+                      <span className="gh-starter-chip-label">{s.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              ));
+            })()}
           </div>
         </div>
       </div>
@@ -203,18 +242,25 @@ export function GitHubConnect({
         <div className="gh-connect-section">
           <div className="gh-chip-scroll">
             <div className="gh-generic-chips">
-              {STARTER_PROMPTS.map((p) => (
-                <Button
-                  key={p}
-                  className="chip gh-generic-chip"
-                  variant="tertiary"
-                  size="small"
-                  iconRight={<ArrowRight size={14} />}
-                  onMouseDown={preventMouseSelection}
-                  onClick={() => onGenericPrompt(p)}
-                >
-                  {p}
-                </Button>
+              {[0, 1].map((row) => (
+                <div key={row} className="gh-chip-row">
+                  {STARTER_PROMPTS.slice(
+                    row * Math.ceil(STARTER_PROMPTS.length / 2),
+                    (row + 1) * Math.ceil(STARTER_PROMPTS.length / 2),
+                  ).map((p) => (
+                    <Button
+                      key={p}
+                      className="chip gh-generic-chip"
+                      variant="tertiary"
+                      size="small"
+                      iconRight={<ArrowRight size={14} />}
+                      onMouseDown={preventMouseSelection}
+                      onClick={() => onGenericPrompt(p)}
+                    >
+                      {p}
+                    </Button>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
