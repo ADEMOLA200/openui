@@ -5,10 +5,9 @@ import { usePathname } from "next/navigation";
 import styles from "./site-primary-nav.module.css";
 
 export const PRIMARY_SITE_NAV_ITEMS = [
-  { title: "OpenUI Lang", href: "/docs/openui-lang" },
+  { title: "Docs", href: "/docs" },
   { title: "Playground", href: "/playground" },
-  { title: "API Reference", href: "/docs/api-reference" },
-  { title: "Blog", href: "/blog" },
+  { title: "Blogs", href: "/blog" },
 ] as const;
 
 export function SitePrimaryNav() {

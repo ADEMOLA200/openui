@@ -1,14 +1,13 @@
-/* ─── Reset & Base ─────────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
+/* Scope playground resets so they do not leak into other routes after navigation.
+   Use `:where()` to keep specificity at zero and avoid overriding react-ui classes. */
+:where(.app, .app *, .app *::before, .app *::after) {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 /* ─── Global ────────────────────────────────────────────────────────────────── */
-body {
+.app {
   font-family: var(--openui-font-body);
   background-color: var(--openui-foreground);
   color: var(--openui-text-neutral-primary);
@@ -20,14 +19,17 @@ body {
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar {
+.app::-webkit-scrollbar,
+.app ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-::-webkit-scrollbar-track {
+.app::-webkit-scrollbar-track,
+.app ::-webkit-scrollbar-track {
   background: transparent;
 }
-::-webkit-scrollbar-thumb {
+.app::-webkit-scrollbar-thumb,
+.app ::-webkit-scrollbar-thumb {
   background: var(--openui-text-neutral-tertiary);
   border-radius: 3px;
 }

@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import styles from "./PossibilitiesSection.module.css";
 
-const cardsCardImg = "/images/home/f380a0bc9e6bc51606848a52165d0b85e68cdc94.png";
+const bottomTraysLightImg = "/homepage/tray-light.png";
+const bottomTraysDarkImg = "/homepage/tray-dark.png";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -36,9 +37,9 @@ const CARDS = [
     darkImage: "/homepage/mobile-dark.png",
   },
   {
-    title: "Cards",
-    lightImage: cardsCardImg,
-    darkImage: cardsCardImg,
+    title: "Bottom trays",
+    lightImage: bottomTraysLightImg,
+    darkImage: bottomTraysDarkImg,
   },
 ] as const satisfies readonly CardImageSet[];
 

@@ -1,5 +1,4 @@
 import { Button } from "@/components/button";
-import { HeroBadge } from "@/components/hero-badge";
 import { CodeBlock, FeatureCard, FeatureCards, Separator, SimpleCard } from "@/components/overview-components";
 import {
   Code2,
@@ -105,8 +104,7 @@ export default function ChatOverviewPage() {
   return (
     <div className="mx-auto max-w-4xl px-3 py-8 font-sans text-slate-900 sm:px-4 sm:py-12 lg:px-8 dark:text-slate-100">
       <section className="mb-12 space-y-6 sm:mb-16">
-        <HeroBadge icon="MessageSquare" text="Generative UI Chat" />
-        <h1 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">OpenUI Chat SDK</h1>
+        <h1 className="docs-page-title max-w-3xl">OpenUI Chat SDK</h1>
         <p className="max-w-2xl text-base leading-7 text-fd-muted-foreground sm:text-lg">
           Production-ready chat UI for AI agents. Start with prebuilt layouts for fast integration,
           then drop down to headless hooks when you need full control over behavior and rendering.

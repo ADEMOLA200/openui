@@ -45,6 +45,15 @@ body {
   max-width: 800px !important;
 }
 
+#nd-page > h1,
+#nd-page .docs-page-title,
+.docs-page-title {
+  font-size: 36px !important;
+  line-height: 1.1 !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.03em;
+}
+
 #nd-page[data-full="true"],
 #nd-page[data-full=""] {
   max-width: 1168px !important;
