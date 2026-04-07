@@ -29,7 +29,9 @@
 
 .openui-shell-new-chat-button {
   width: 100%;
-  justify-content: space-between;
+  justify-content: flex-start;
+  padding-left: cssUtils.$space-s;
+  padding-right: cssUtils.$space-s;
 
   .openui-shell-sidebar-header--collapsed & {
     width: auto;

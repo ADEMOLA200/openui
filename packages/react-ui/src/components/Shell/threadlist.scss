@@ -3,15 +3,17 @@
 .openui-shell-thread-list {
   display: flex;
   flex-direction: column;
-  gap: cssUtils.$space-s;
+  gap: cssUtils.$space-2xs;
   overflow: auto;
+  margin-top: cssUtils.$space-m;
 }
 
 .openui-shell-thread-list-group {
   display: flex;
-  padding-left: cssUtils.$space-xs;
-  color: cssUtils.$text-neutral-secondary;
-  @include cssUtils.typography(label, default);
+  padding-left: cssUtils.$space-s;
+  color: cssUtils.$text-neutral-tertiary;
+  @include cssUtils.typography(label, small);
+  margin-bottom: cssUtils.$space-2xs;
 }
 
 .openui-shell-thread-button {
@@ -19,12 +21,16 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  border-radius: cssUtils.$radius-s;
+  border-radius: calc(cssUtils.$radius-s + 1px);
   border: 1px solid transparent;
+  transition: all 0.12s ease;
 
   &--selected {
-    background-color: cssUtils.$sunk;
-    border-color: cssUtils.$border-default;
+    background-color: cssUtils.$highlight;
+  }
+
+  &:hover {
+    background-color: cssUtils.$highlight;
   }
 
   &:hover {
@@ -36,9 +42,9 @@
 
 .openui-shell-thread-button-title {
   @include cssUtils.button-reset;
-  @include cssUtils.typography(primary, default);
+  @include cssUtils.typography(body, small);
   color: cssUtils.$text-neutral-primary;
-  padding: cssUtils.$space-2xs cssUtils.$space-xs;
+  padding: calc(cssUtils.$space-xs - 1.75px) cssUtils.$space-s;
   width: 100%;
   text-align: left;
   cursor: pointer;
@@ -50,9 +56,9 @@
 .openui-shell-thread-button-dropdown-trigger {
   @include cssUtils.button-reset;
   outline: none;
-  @include cssUtils.typography(primary, default);
+  @include cssUtils.typography(body, small);
   color: cssUtils.$text-neutral-primary;
-  padding: cssUtils.$space-2xs cssUtils.$space-xs;
+  padding: calc(cssUtils.$space-s - 1.75px) cssUtils.$space-s;
   flex-shrink: 0;
   min-height: 28px;
   cursor: pointer;
@@ -68,27 +74,42 @@
 }
 
 .openui-shell-thread-button-dropdown-menu {
-  display: flex;
-  flex-direction: column;
-  padding: cssUtils.$space-xs;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 99999;
+  min-width: 160px;
+  overflow: hidden;
   border: 1px solid cssUtils.$border-default;
-  border-radius: cssUtils.$radius-m;
+  border-radius: cssUtils.$radius-xl;
   background-color: cssUtils.$foreground;
-  z-index: 9999;
+  box-shadow: cssUtils.$shadow-m;
+  color: cssUtils.$text-neutral-primary;
+  transform-origin: top center;
+  animation: openui-shell-thread-menu-show 0.18s ease-out forwards;
+  padding: 4px;
 }
 
 .openui-shell-thread-button-dropdown-menu-item {
-  @include cssUtils.button-reset;
-  @include cssUtils.typography(primary, default);
-  outline: none;
-  color: cssUtils.$text-neutral-primary;
-  padding: cssUtils.$space-2xs cssUtils.$space-xs;
-  display: flex;
-  align-items: center;
-  gap: cssUtils.$space-2xs;
-  cursor: pointer;
+  width: 100%;
+  justify-content: flex-start;
+  padding-left: cssUtils.$space-s;
+  padding-right: cssUtils.$space-s;
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
 }
 
-.openui-shell-thread-button-dropdown-menu-item-icon {
-  color: cssUtils.$text-neutral-secondary;
+@keyframes openui-shell-thread-menu-show {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

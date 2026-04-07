@@ -112,6 +112,7 @@ $center-align-spacing: calc(32px + cssUtils.$space-s);
   height: 100%;
   overflow: auto;
   padding: cssUtils.$space-m $center-align-spacing cssUtils.$space-xl;
+  scroll-padding-top: cssUtils.$space-2xl;
 
   scrollbar-width: thin;
   scrollbar-color: cssUtils.$highlight-strong transparent;
@@ -140,6 +141,7 @@ $center-align-spacing: calc(32px + cssUtils.$space-s);
 
   .openui-shell-container--mobile & {
     padding: cssUtils.$space-l;
+    scroll-padding-top: cssUtils.$space-l;
   }
 
   // When artifact is active, reduce padding to maximize space
@@ -162,6 +164,7 @@ $center-align-spacing: calc(32px + cssUtils.$space-s);
 .openui-shell-thread-messages {
   max-width: 880px;
   margin: 0 auto;
+  padding-top: cssUtils.$space-l;
   display: flex;
   flex-direction: column;
   gap: calc(2 * cssUtils.$space-l);

@@ -249,8 +249,8 @@ const createColorTheme = ({
     chatUserResponseText: accentText,
 
     // Border
-    borderDefault: withAlpha(overlayBase, isDark ? 0.12 : 0.06),
-    borderInteractive: withAlpha(overlayBase, isDark ? 0.2 : 0.12),
+    borderDefault: withAlpha(overlayBase, isDark ? 0.06 : 0.06),
+    borderInteractive: withAlpha(overlayBase, isDark ? 0.12 : 0.12),
     borderInteractiveEmphasis: withAlpha(overlayBase, isDark ? 0.4 : 0.3),
     borderInteractiveSelected: isDark ? swatch(neutral, 50) : swatch(neutral, 1000),
     borderAccent: withAlpha(brandSolid, isDark ? 0.2 : 0.08),

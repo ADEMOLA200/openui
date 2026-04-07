@@ -13,7 +13,7 @@ $center-align-spacing: calc(32px + cssUtils.$space-s);
   &--short {
     display: flex;
     flex-wrap: wrap;
-    gap: cssUtils.$space-s;
+    gap: cssUtils.$space-xs;
   }
 
   // Long variant - vertical stacked list with separators
@@ -46,13 +46,13 @@ $center-align-spacing: calc(32px + cssUtils.$space-s);
   align-items: center;
   gap: cssUtils.$space-xs;
   width: fit-content;
-  padding: cssUtils.$space-s cssUtils.$space-m;
+  padding: cssUtils.$space-s cssUtils.$space-s-m;
   background-color: cssUtils.$foreground;
   border: 1px solid cssUtils.$border-default;
-  border-radius: cssUtils.$radius-m;
+  border-radius: cssUtils.$radius-l;
   cursor: pointer;
   transition: all 0.15s ease;
-  @include cssUtils.typography(body, default);
+  @include cssUtils.typography(body, small);
   color: cssUtils.$text-neutral-primary;
   text-align: left;
 
@@ -63,6 +63,11 @@ $center-align-spacing: calc(32px + cssUtils.$space-s);
     justify-content: center;
     flex-shrink: 0;
     color: cssUtils.$text-neutral-primary;
+
+    & > svg {
+      width: 14px;
+      height: 14px;
+    }
   }
 
   // Text
@@ -81,7 +86,7 @@ $center-align-spacing: calc(32px + cssUtils.$space-s);
   }
 
   @media (max-width: 480px) {
-    padding: cssUtils.$space-s cssUtils.$space-m;
+    padding: cssUtils.$space-s cssUtils.$space-s-m;
   }
 }
 
