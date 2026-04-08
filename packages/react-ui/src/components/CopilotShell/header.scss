@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: cssUtils.$space-m cssUtils.$space-l;
+  padding: cssUtils.$space-m;
   border-bottom: 1px solid cssUtils.$border-default;
   background-color: cssUtils.$foreground;
 }
@@ -13,7 +13,6 @@
   display: flex;
   align-items: center;
   gap: cssUtils.$space-s;
-  @include cssUtils.typography(title, medium);
 }
 
 .openui-copilot-shell-header-logo {
@@ -23,10 +22,11 @@
 }
 
 .openui-copilot-shell-header-agent-name {
-  @include cssUtils.typography(title, medium);
+  @include cssUtils.typography(label, small);
   color: cssUtils.$text-neutral-primary;
 }
 
+.openui-copilot-shell-header-actions,
 .openui-copilot-shell-header-right-content {
   display: flex;
   align-items: center;

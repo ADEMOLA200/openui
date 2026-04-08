@@ -5,8 +5,9 @@ import clsx from "clsx";
 import { EllipsisVerticalIcon, Trash2Icon } from "lucide-react";
 import { Fragment, useEffect } from "react";
 import { useLayoutContext } from "../../context/LayoutContext";
-import { Button } from "../Button";
 import { useShellStore } from "../_shared/store";
+import { Button } from "../Button";
+import { IconButton } from "../IconButton";
 import { useTheme } from "../ThemeProvider";
 
 export const ThreadButton = ({
@@ -51,9 +52,13 @@ export const ThreadButton = ({
       </button>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
-          <button className="openui-shell-thread-button-dropdown-trigger">
-            <EllipsisVerticalIcon size={14} />
-          </button>
+          <IconButton
+            icon={<EllipsisVerticalIcon size="1em" />}
+            aria-label={`More actions for ${title}`}
+            variant="tertiary"
+            size="extra-small"
+            className="openui-shell-thread-button-dropdown-trigger"
+          />
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content

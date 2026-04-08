@@ -245,8 +245,8 @@ const createColorTheme = ({
     interactiveDestructiveAccentDisabled: withAlpha(swatch(dangerSwatch, 600), 0.4),
 
     // Chat
-    chatUserResponseBg: brandSolid,
-    chatUserResponseText: accentText,
+    chatUserResponseBg: withAlpha(brandSolid, 0.08),
+    chatUserResponseText: neutralPrimary,
 
     // Border
     borderDefault: withAlpha(overlayBase, isDark ? 0.06 : 0.06),
