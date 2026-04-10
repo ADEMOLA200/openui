@@ -14,6 +14,14 @@
   color: cssUtils.$text-neutral-tertiary;
   @include cssUtils.typography(label, small);
   margin-bottom: cssUtils.$space-2xs;
+
+  .openui-shell-container--mobile & {
+    @include cssUtils.typography(label, default);
+  }
+
+  &:not(:first-child) {
+    margin-top: cssUtils.$space-m;
+  }
 }
 
 .openui-shell-thread-button {
@@ -59,6 +67,11 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+
+  .openui-shell-container--mobile & {
+    @include cssUtils.typography(body, default);
+    padding: calc(cssUtils.$space-s - 1.75px) cssUtils.$space-s;
+  }
 }
 
 .openui-shell-thread-button-dropdown-trigger {

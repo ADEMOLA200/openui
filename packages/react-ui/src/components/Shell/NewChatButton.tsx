@@ -1,6 +1,7 @@
 import { useThreadList } from "@openuidev/react-headless";
 import clsx from "clsx";
 import { SquarePen } from "lucide-react";
+import { useLayoutContext } from "../../context/LayoutContext";
 import { Button } from "../Button";
 import { IconButton } from "../IconButton";
 import { useShellStore } from "../_shared/store";
@@ -11,10 +12,12 @@ export const NewChatButton = ({ className }: { className?: string }) => {
   const { isSidebarOpen } = useShellStore((state) => ({
     isSidebarOpen: state.isSidebarOpen,
   }));
+  const { layout } = useLayoutContext();
   const sidebarVisualState = useOptionalSidebarVisualState();
   const showExpandedButton = sidebarVisualState
     ? sidebarVisualState.visualState === "expanded"
     : isSidebarOpen;
+  const isMobile = layout === "mobile";
 
   if (!showExpandedButton) {
     return (
@@ -22,7 +25,7 @@ export const NewChatButton = ({ className }: { className?: string }) => {
         icon={<SquarePen size="1em" />}
         onClick={switchToNewThread}
         variant="secondary"
-        size="small"
+        size={isMobile ? "medium" : "small"}
         className={clsx("openui-shell-new-chat-button_collapsed", className)}
       />
     );
@@ -33,7 +36,7 @@ export const NewChatButton = ({ className }: { className?: string }) => {
       className={clsx("openui-shell-new-chat-button", className)}
       iconLeft={<SquarePen />}
       variant="secondary"
-      size="small"
+      size={isMobile ? "medium" : "small"}
       onClick={switchToNewThread}
     >
       New Chat

@@ -56,7 +56,7 @@ export const ThreadButton = ({
             icon={<EllipsisVerticalIcon size="1em" />}
             aria-label={`More actions for ${title}`}
             variant="tertiary"
-            size="extra-small"
+            size={layout === "mobile" ? "small" : "extra-small"}
             className="openui-shell-thread-button-dropdown-trigger"
           />
         </DropdownMenu.Trigger>

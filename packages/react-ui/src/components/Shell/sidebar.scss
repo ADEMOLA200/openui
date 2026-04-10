@@ -3,7 +3,7 @@
 $sidebar-width: 272px;
 $sidebar-padding: cssUtils.$space-m;
 $sidebar-mobile-width: 294px;
-$sidebar-mobile-padding: cssUtils.$space-l;
+$sidebar-mobile-padding: cssUtils.$space-m;
 $sidebar-fade-duration: 90ms;
 $sidebar-resize-duration: 160ms;
 $sidebar-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -117,6 +117,10 @@ $sidebar-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
     @include cssUtils.typography(label, small);
     flex-grow: 1;
     color: cssUtils.$text-neutral-primary;
+
+    .openui-shell-container--mobile & {
+      @include cssUtils.typography(label, default);
+    }
 
     .openui-shell-sidebar-container--collapsed & {
       display: none;
