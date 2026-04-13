@@ -42,8 +42,8 @@
       "description": "Syntax-highlighted code block"
     },
     "Table": {
-      "signature": "Table(columns: Col[])",
-      "description": "Data table — column-oriented. Each Col holds its own data array."
+      "signature": "Table(columns: Col[], pageSize?: number)",
+      "description": "Data table — column-oriented. Each Col holds its own data array. Optional pageSize controls rows per page."
     },
     "Col": {
       "signature": "Col(label: string, data: any, type?: \"string\" | \"number\" | \"action\")",
